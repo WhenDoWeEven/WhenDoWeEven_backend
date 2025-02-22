@@ -6,7 +6,7 @@ import logging
 import icalendar
 from icalendar import Calendar
 from icalevents import icalevents
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pytz import UTC
 
 """
@@ -67,30 +67,36 @@ def parse_ical_file(file_path: str):
     
     return parsed_data
 
-def get_events_in_range(parsed_data:dict ,start:datetime ,end:datetime) -> dict[str,list[dict]]:
-    user_free_time: list[tuple] = []
+def get_events_in_range(parsed_data:dict ,invite_range_start:datetime ,invite_range_end:datetime) -> dict[str,list[dict]]:
+    time_block = {
+        
+    } 
+    user_free_time: list[dict] = [time_block] ### This will be sorted
+
     
     for event in parsed_data["events"]:
         
         sched_event_start: datetime = event["start"]
         sched_event_end: datetime = event["end"]
+        
+        sched_duration: timedelta = sched_event_end - sched_event_start
 
-
-        user_free_start: datetime
-        user_free_end: datetime
-        if event_start < start and event_end < start:
+        
+        if sched_event_start < start and sched_event_end < start:
             '''
             If the users event starts and ends before the start and end time of the range their being invited to...
-            This event doesn't conflict with the range at all
+            This event doesn't conflict with the range at all!
             '''
-            user_free_start = start
-            user_free_end = end
+            
         elif event_start > start and event_start < end:
             
 
     for busy_time in parsed_data["busy_times"]:
         busy_start: datetime = busy_time["start"]
         busy_end: datetime = busy_time["start"]
+
+
+def does_sched_event_overlap(sched_event_start: datetime, sched_event_end: datetime, invite_range_start,invite_range_end)->bool:
 
 def main():
 
