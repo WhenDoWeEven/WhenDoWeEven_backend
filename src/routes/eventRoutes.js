@@ -5,8 +5,8 @@ const auth = require('../middleware/auth');
 const { validateEvent } = require('../middleware/validate');
 
 
-router.post('/create', validateEvent, eventController.createEvent);
-router.post('/uploadCal', auth, eventController.uploadCal);
+router.post('/create', validateEvent, eventController.createEvent); //done
+router.post('/uploadCal', auth, eventController.uploadCal); //done
 router.post('/manualSel', auth, eventController.manualSel);
 router.get('/recommendations', eventController.recommendations);
 router.post('/upvote', auth, eventController.upvote);

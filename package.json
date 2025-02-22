@@ -14,7 +14,8 @@
     "express": "^4.17.1",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.10.9"
+    "mongoose": "^5.10.9",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "jest": "^26.6.0",
