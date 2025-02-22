@@ -4,9 +4,10 @@ import json
 
 import logging
 import icalendar
-from icalendar import Event
+from icalendar import Calendar
 from icalevents import icalevents
 from datetime import datetime, timezone
+from pytz import UTC
 
 """
 Calendar file parser based off of RFC 
@@ -14,11 +15,8 @@ Calendar file parser based off of RFC
 """
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(filename="parser-logs/debug_logs.log",level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 def is_url(input_str: str) -> bool:
     """
     Check if user is passing in a url to a calendar or a downloaded file
@@ -30,67 +28,75 @@ def is_url(input_str: str) -> bool:
         bool: True if the input is a url
     """
     return input_str.startswith(("http://", "https://"))
-def extract_ical_content(cal_location: str, start: datetime, end: datetime) -> dict:
+
+def parse_ical_file(file_path: str):
     """
-    Reads an iCalendar file (.ics, .ical, .ifb) and extracts both VEVENT (events) 
-    and VFREEBUSY (free/busy) data within a given time range.
-
-    :param cal_location: Path to the calendar file.
-    :param start: Start date (datetime object) for filtering events.
-    :param end: End date (datetime object) for filtering events.
-    :return: Dictionary containing "events" and "freebusy" data.
+    Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
+    
+    :param file_path: Path to the .ics file.
+    :return: Dictionary with events and busy times.
     """
-
-    calendar_events: list[Event]
-    try:
-
-        if is_url(cal_location):
-            calendar_events = icalevents.events(url=cal_location, start=start, end=end,fix_apple=True,tzinfo=timezone.utc)
-        else:
-            calendar_events = icalevents.events(file=cal_location, start=start, end=end, fix_apple=True,tzinfo=timezone.utc)
+    # Initialize a dictionary to hold events and busy times
+    parsed_data: dict[str,list] = {"events": [], 
+                                   "busy_times": []}
+    
+    # Open and read the .ics file
+    with open(file_path, 'rb') as f:
+        # Parse the content using the icalendar library
+        cal = Calendar.from_ical(f.read())
+    
+    # Iterate over the calendar components
+    for component in cal.walk():
+        # Check for VEVENT (Event)
+        if component.name == "VEVENT":
+            event = {
+                "summary": str(component.get('summary')),
+                "start": component.get('dtstart').dt,
+                "end": component.get('dtend').dt
+            }
+            parsed_data["events"].append(event)
         
-        event_data = []
-        freebusy_data = []
+        # Check for VFREEBUSY (Busy Time)
+        elif component.name == "VFREEBUSY":
+            busy_time = {
+                "start": component.get('dtstart').dt,
+                "end": component.get('dtend').dt,
+                "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
+            }
+            parsed_data["busy_times"].append(busy_time)
+    
+    return parsed_data
+
+def get_events_in_range(parsed_data:dict ,start:datetime ,end:datetime) -> dict[str,list[dict]]:
+    user_free_time: list[tuple] = []
+    
+    for event in parsed_data["events"]:
         
-        for e in calendar_events:
-            # Distinguish between event types
-            if e.name == "VEVENT":
-                event_data.append(str(e))
-            elif e.name == "VFREEBUSY":
-                freebusy_data.append(str(e))
-
-        if not event_data and not freebusy_data:
-            logging.warning("No VEVENT or VFREEBUSY data found in the given time range.")
-            return {"error": "No VEVENT or VFREEBUSY data found."}
-
-        return {
-            "events": "\n".join(event_data) if event_data else "No events found",
-            "freebusy": "\n".join(freebusy_data) if freebusy_data else "No free/busy data found",
-        }
-
-    except FileNotFoundError:
-        logging.error(f"File not found: {cal_location}")
-        return {"error": "File not found."}
-    except Exception as e:
-        logging.error(f"An error occurred while processing {cal_location}: {e}")
-        return {"error": str(e)}
+        sched_event_start: datetime = event["start"]
+        sched_event_end: datetime = event["end"]
 
 
+        user_free_start: datetime
+        user_free_end: datetime
+        if event_start < start and event_end < start:
+            '''
+            If the users event starts and ends before the start and end time of the range their being invited to...
+            This event doesn't conflict with the range at all
+            '''
+            user_free_start = start
+            user_free_end = end
+        elif event_start > start and event_start < end:
+            
 
-
+    for busy_time in parsed_data["busy_times"]:
+        busy_start: datetime = busy_time["start"]
+        busy_end: datetime = busy_time["start"]
 
 def main():
-    # Example usage:
-    start_date = datetime(2025, 2, 22)
-    end_date = datetime(2025, 3, 1)
 
-    ical_data = extract_ical_content("test_cal_files/test.ics", start=start_date, end=end_date)
-    print(ical_data)
-    # # Example usage:
-    # ical_data = extract_ical_content("calendar.ics")
-    # print("Events:\n", ical_data.get("events", "No event data"))
-    # print("\nFree/Busy:\n", ical_data.get("freebusy", "No free/busy data"))
-    # extract_ical_content("")
+    file = "test_cal_files/test.ics"
+    data = parse_ical_file(file)
+    print(data["events"])
 
 if __name__ == "__main__":
     main()
