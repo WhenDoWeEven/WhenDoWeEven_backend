@@ -14,6 +14,7 @@ Calendar file parser based off of RFC
     
 """
 
+### TO-DO --> add a neurodivergent mode!
 # Configure logging
 logging.basicConfig(filename="parser-logs/debug_logs.log",level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -67,37 +68,50 @@ def parse_ical_file(file_path: str):
     
     return parsed_data
 
-def get_events_in_range(parsed_data:dict ,invite_range_start:datetime ,invite_range_end:datetime) -> dict[str,list[dict]]:
-    time_block = {
-        
-    } 
-    user_free_time: list[dict] = [time_block] ### This will be sorted
-
+def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetime ,invite_range_end:datetime) -> dict[str,list[dict]]:
     
-    for event in parsed_data["events"]:
+    index: int = 0
+    for event in user_events["events"]:
         
         sched_event_start: datetime = event["start"]
         sched_event_end: datetime = event["end"]
+
+        if does_sched_event_overlap_with_invite(sched_event_start,sched_event_end,invite_range_start,invite_range_end) == False:
+            ### Remove that entry from the data
+            del user_events["events"][index]
+        index +=1
+
+    ### reset the index
+    index = 0
+    for busy_time in user_events["busy_times"]:
+
+        sched_event_start: datetime = busy_time["start"]
+        sched_event_end: datetime = busy_time["end"]
+
+        if does_sched_event_overlap_with_invite(sched_event_start,sched_event_end,invite_range_start,invite_range_end) == False:
+            ### Remove that entry from the data
+            del user_events["busy_times"][index]
         
-        sched_duration: timedelta = sched_event_end - sched_event_start
+        index += 1
 
-        
-        if sched_event_start < start and sched_event_end < start:
-            '''
-            If the users event starts and ends before the start and end time of the range their being invited to...
-            This event doesn't conflict with the range at all!
-            '''
-            
-        elif event_start > start and event_start < end:
-            
+    return user_events
 
-    for busy_time in parsed_data["busy_times"]:
-        busy_start: datetime = busy_time["start"]
-        busy_end: datetime = busy_time["start"]
+def find_free_times()-> list[datetime]:
+    pass
 
-
-def does_sched_event_overlap(sched_event_start: datetime, sched_event_end: datetime, invite_range_start,invite_range_end)->bool:
-
+def does_sched_event_overlap_with_invite(sched_event_start: datetime, sched_event_end: datetime, invite_range_start: datetime,invite_range_end: datetime)->bool:
+    if sched_event_start > invite_range_start and sched_event_start < invite_range_end:
+        ### If the start time of the event falls between the range return True
+        return True
+    elif sched_event_end > invite_range_start and sched_event_end < invite_range_end:
+        ### If the end time of the event falls between the range
+        return True
+    elif sched_event_start < invite_range_start and sched_event_end > invite_range_end:
+        return True
+    
+    return False
+def does_sched_event_overlap_with_processed_events():
+    pass
 def main():
 
     file = "test_cal_files/test.ics"
