@@ -40,22 +40,50 @@ def process_args() -> tuple[str,str]:
     # Add positional arguments (no -- required)
     parser.add_argument("filename", type=str, help="The name of the file")
     parser.add_argument("event_id", type=str, help="The event ID")
-
+    parser.add_argument("user_id",type=str, help="The user ID")
     # Parse the arguments
     args = parser.parse_args()
     
     return (args.filename,args.event_id)
-    
+
+def run_script(PATH_TO_FILE:str, event_id,user_id):
+    ### Get the Event document ###
+        event_document: dict = get_db_event_document(CLIENT,event_id)
+        
+        ### Get the preferred dates and times
+        pref_dates_and_times = get_preferred_dates_and_times(event_dict=event_document)
+
+        pref_dates: list[datetime] = pref_dates_and_times["dates"]
+        start_time: time = pref_dates_and_times["start_time"]
+        end_time: time = pref_dates_and_times["end_time"]
+
+        ### tied to the user
+        user_ical_dict: dict = parse_ical_file(PATH_TO_FILE)
+        free_times = []
+        for date in pref_dates:
+            # Combine each date with the start and end times
+            start_datetime = datetime.combine(date, start_time)
+            end_datetime = datetime.combine(date, end_time)
+            
+            free_times.extend(find_free_times(filter_out_events_outside_range(user_events=user_ical_dict,invite_range_start=start_datetime, invite_range_end=end_datetime)))
+
+        print(free_times)
+        ### put all free times under the user in mongo
+        
+            
+        ### get the free times for the entire event 
+        ### update the event in mongo
 
 if __name__ == "__main__":
-    from cal_parser.parser import parse_json_name, is_cal_file, get_path_from_filename,parse_ical_file
+    from cal_parser.parser import parse_json_name, is_cal_file, get_path_from_filename,parse_ical_file, filter_out_events_outside_range
     from mongoDB.configure import connect_to_mongoDB
-
+    from mongoDB.retrieve_data import get_db_event_document, get_preferred_dates_and_times
+    from rec_algo.find_times_algo import find_free_times
     # BASE_DIR = Path("../temp_data")
     BASE_DIR = Path("/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/temp_data")
     # TEST_PATH_TO_JSON = "../../../temp_data/test_google_.json"
 
-    filename, event_id = process_args()
+    filename, event_id, user_id = process_args()
 
     CLIENT: MongoClient = connect_to_mongoDB()
     
@@ -71,17 +99,14 @@ if __name__ == "__main__":
         ### pull in the file
         PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)
         
+        run_script(PATH_TO_FILE,event_id,user_id)
         
         
-        ### process the file
-        print(PATH_TO_FILE)
-        user_time_dict: dict = parse_ical_file(PATH_TO_FILE)
-        print(user_time_dict)
+        # print(user_time_dict)
 
-        ### put all free times under the user
+        ###
         
-        ### get the free times for the entire event 
-        ### update the event in mongo
+        
 
         
 

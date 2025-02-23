@@ -4,7 +4,7 @@ from bson import ObjectId
 from collections import defaultdict
 
 from mongoDB.configure import connect_to_mongoDB
-
+from cal_parser.parser import convert_datetime_to_time,convert_str_to_datetime_object
 
 DATABASE = "BRICKHACK11"
 
@@ -71,7 +71,6 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
     return users_free_time
 
 def get_preferred_dates_and_times(event_dict: dict) -> dict:
-    from cal_parser.convert import convert_datetime_to_time,convert_str_to_datetime_object
     pref_dates: list[str] = event_dict["preferedDates"]
     pref_datetime_objects: list[datetime] = []
 

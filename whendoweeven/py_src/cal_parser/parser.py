@@ -380,10 +380,13 @@ def convert_to_utc(time_stamp):
 
 
 if __name__ == "__main__":
-    file = "test_cal_files/test.ics"
-
-    with open("test_cal_files/test_url.txt") as url_file:
-        url_content = url_file.read()
+    from rec_algo.find_times_algo import find_free_times
+    #file = "/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/py_src/cal_parser/test_cal_files/test.ics"
+    BASE_DIR = Path("/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/temp_data/")
+    FILE_NAME = "test_upload.ics"
+    file_path = BASE_DIR / FILE_NAME
+    # with open("test_cal_files/test_url.txt") as url_file:
+    #     url_content = url_file.read()
        
 
 
@@ -403,7 +406,7 @@ if __name__ == "__main__":
     # print("_______________________________________________________________")
     # user_cal_url_filtered = filter_out_events_outside_range(user_events=user_cal_url,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
     # print(user_cal_url_filtered)
-    user_cal: dict = parse_ical_file(file)
+    user_cal: dict = parse_ical_file(file_path)
     print(user_cal)
     print("                      BASE USER CAL                            ")
     print("_______________________________________________________________")
