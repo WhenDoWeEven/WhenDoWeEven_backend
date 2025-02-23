@@ -5,8 +5,6 @@ import argparse
 from datetime import datetime, time
 from pymongo import MongoClient
 
-from cal_parser.convert import convert_user_json_calendar_to_ics
-
 
 def get_user_json_calendar(user_json_cal: json) -> dict:
     # user_dict_cal = convert_user_json_calendar_to_dict(user_json_cal)
@@ -50,11 +48,12 @@ def process_args() -> tuple[str,str]:
     
 
 if __name__ == "__main__":
-    from cal_parser.parser import parse_json_name, is_cal_file, get_path_from_filename
+    from cal_parser.parser import parse_json_name, is_cal_file, get_path_from_filename,parse_ical_file
     from mongoDB.configure import connect_to_mongoDB
 
-    BASE_DIR = Path("../../../temp_data/")
-    TEST_PATH_TO_JSON = "../../../temp_data/test_google_.json"
+    # BASE_DIR = Path("../temp_data")
+    BASE_DIR = Path("/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/temp_data")
+    # TEST_PATH_TO_JSON = "../../../temp_data/test_google_.json"
 
     filename, event_id = process_args()
 
@@ -69,15 +68,18 @@ if __name__ == "__main__":
     # invite_end: time = invite_info["end_time"]
 
     if parse_json_name(filename) == "upload" and is_cal_file(filename):
-        PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)
         ### pull in the file
+        PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)
+        
+        
+        
         ### process the file
-        #user_time_dict: dict = parse_ical_file(PATH_TO_FILE)
         print(PATH_TO_FILE)
-
-
+        user_time_dict: dict = parse_ical_file(PATH_TO_FILE)
+        print(user_time_dict)
 
         ### put all free times under the user
+        
         ### get the free times for the entire event 
         ### update the event in mongo
 
