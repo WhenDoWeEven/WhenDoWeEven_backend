@@ -15,7 +15,7 @@ Calendar file parser based off of RFC
 
 ### TO-DO --> add a neurodivergent mode!
 # Configure logging
-logging.basicConfig(filename="parser-logs/debug_logs.log",level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(filename="track.logs",level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def is_url(input_str: str) -> bool:
     """
@@ -36,6 +36,8 @@ def parse_ical_url(url: str)-> dict[str,list]:
     :param url: The URL of the iCalendar (.ics) file.
     :return: List of event dictionaries containing summary, start, and end times.
     """
+    from convert import convert_date_obj_to_datetime_obj, convert_to_utc
+
     parsed_data: dict[str,list] = {"events": [], 
                                    "busy_times": []}
     try:

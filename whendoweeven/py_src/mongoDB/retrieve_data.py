@@ -1,17 +1,10 @@
-import icalendar
-from icalendar import Calendar
-import json
-import sys
-from pathlib import Path
 from datetime import datetime, time
 from pymongo import MongoClient
 from bson import ObjectId
 from collections import defaultdict
 
-
-from cal_parser.convert import convert_str_to_datetime_object, convert_timestamp_to_datetime_object, convert_datetime_to_time
 from mongoDB.configure import connect_to_mongoDB
-from cal_parser.parser import parse_json_name
+
 
 DATABASE = "BRICKHACK11"
 
@@ -47,6 +40,7 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
     Returns:
         dict[list[tuple[datetime,datetime]]]: Every key will be an Object id. The value is a list of the times that the user is free
     """
+    from cal_parser.convert import convert_timestamp_to_datetime_object
     users_free_time = defaultdict(list)
 
     matching_users = client[DATABASE][USER_COLLECTIION].find({"eventId": event_id})
@@ -77,7 +71,7 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
     return users_free_time
 
 def get_preferred_dates_and_times(event_dict: dict) -> dict:
-
+    from cal_parser.convert import convert_datetime_to_time,convert_str_to_datetime_object
     pref_dates: list[str] = event_dict["preferedDates"]
     pref_datetime_objects: list[datetime] = []
 

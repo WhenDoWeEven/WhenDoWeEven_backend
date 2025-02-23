@@ -3,10 +3,6 @@ import sys
 from pathlib import Path
 
 
-from cal_parser.parser import parse_ical_file
-
-
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 def find_free_times(filtered_user_events: dict[str, list[dict[str, datetime]]], invite_range_start: datetime, invite_range_end: datetime) -> list[tuple[datetime, datetime]]:
     """

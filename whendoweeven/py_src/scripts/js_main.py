@@ -5,6 +5,8 @@ import argparse
 from datetime import datetime, time
 from pymongo import MongoClient
 
+from cal_parser.convert import convert_user_json_calendar_to_ics
+
 
 def get_user_json_calendar(user_json_cal: json) -> dict:
     # user_dict_cal = convert_user_json_calendar_to_dict(user_json_cal)
@@ -48,13 +50,11 @@ def process_args() -> tuple[str,str]:
     
 
 if __name__ == "__main__":
+    from cal_parser.parser import parse_json_name, is_cal_file, get_path_from_filename
+    from mongoDB.configure import connect_to_mongoDB
 
-    
     BASE_DIR = Path("../../../temp_data/")
     TEST_PATH_TO_JSON = "../../../temp_data/test_google_.json"
-
-    filename: str
-    event_id: str
 
     filename, event_id = process_args()
 

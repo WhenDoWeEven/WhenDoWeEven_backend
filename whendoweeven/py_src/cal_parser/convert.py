@@ -112,6 +112,28 @@ def convert_str_to_datetime_object(date:str) -> datetime:
     return date_obj_utc
 
 
+def convert_to_utc(time_stamp):
+    """
+    Converts a given timestamp to a UTC datetime object.
+
+    Args:
+        time_stamp (datetime): The datetime object to convert.
+
+    Returns:
+        datetime: A UTC datetime object.
+    """
+    if time_stamp.tzinfo is None:
+        # If the datetime is naive (without timezone info), assume it's local time
+        local_tz = pytz.timezone("America/New_York")  # Example local timezone
+        time_stamp = local_tz.localize(time_stamp)
+    
+    # Convert the datetime to UTC
+    utc_time = time_stamp.astimezone(pytz.utc)
+
+    # Return as a naive datetime in UTC (without the timezone info)
+    return utc_time.replace(tzinfo=None)
+
+
 
 
 
