@@ -159,7 +159,42 @@ exports.upvote = async (req, res) => {
     }
 };
 
-// finalizeTime
-exports.finalizeTime = async (req, res) => {
-    // update the logic here
+// creatorDecisition
+exports.creatorDecisition = async (req, res) => {
+    try {
+        const { eventId, recommendationId } = req.body;
+        const userId = req.user._id;
+        const event = await Event.findOne({ eventId: eventId });
+
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        console.log('hi 12', event.owner, userId);
+
+        if (event.owner != userId) {
+            return res.status(403).json({ error: 'Unauthorized, only owner can perform this action' });
+        }
+
+
+        event.recommendations.forEach(rec => {
+            if(rec.id != recommendationId)
+                rec.isFinalized = false;
+        });
+
+        const recommendation = event.recommendations.find(rec => rec.id == recommendationId);
+
+        if (!recommendation) {
+            return res.status(404).json({ error: 'Recommendation not found' });
+        }
+
+
+        recommendation.isFinalized = !recommendation.isFinalized;
+        updatedEvent = new Event(event);
+        await updatedEvent.save();
+
+        res.status(200).json({ recommendations: updatedEvent.recommendations });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
 };
