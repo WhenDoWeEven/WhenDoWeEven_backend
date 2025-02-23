@@ -1,7 +1,7 @@
 import icalendar
 from typing import Optional, Any
 import json
-
+import requests
 import logging
 import icalendar
 from icalendar import Calendar
@@ -31,7 +31,38 @@ def is_url(input_str: str) -> bool:
     """
     return input_str.startswith(("http://", "https://"))
 
-def parse_ical_file(file_path: str):
+def fetch_and_parse_ical(url: str):
+    """
+    Fetches an .ics calendar from a URL and parses its events.
+
+    :param url: The URL of the iCalendar (.ics) file.
+    :return: List of event dictionaries containing summary, start, and end times.
+    """
+    try:
+        # Fetch the .ics file content
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
+
+        # Parse the calendar
+        cal = icalendar.Calendar.from_ical(response.content)
+
+        events = []
+        for component in cal.walk():
+            if component.name == "VEVENT":
+                event = {
+                    "summary": str(component.get('summary')),
+                    "start": component.get('dtstart').dt,  # Can be datetime or date
+                    "end": component.get('dtend').dt
+                }
+                events.append(event)
+
+        return events
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching the .ics file: {e}")
+        return []
+
+def parse_ical_file(file_path: str) -> dict[str,list]:
     """
     Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
     
@@ -114,32 +145,25 @@ def convert_to_utc(dt):
 
 def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetime ,invite_range_end:datetime) -> dict[str,list[dict]]:
     
-    index: int = 0
-    for event in user_events["events"]:
-        
+    # Iterate backwards to prevent index shifting issues
+    for index in reversed(range(len(user_events["events"]))):
+        event = user_events["events"][index]
         sched_event_start: datetime = event["start"]
         sched_event_end: datetime = event["end"]
 
-        if does_sched_event_overlap_with_invite(sched_event_start,sched_event_end,invite_range_start,invite_range_end) == False:
-            ### Remove that entry from the data
-            del user_events["events"][index]
-        elif does_sched_event_completely_overlap_with_invite(sched_event_start,sched_event_end,invite_range_start,invite_range_end) == True:
-            del user_events["events"][index]
-        index +=1
+        if (not does_sched_event_overlap_with_invite(sched_event_start, sched_event_end, invite_range_start, invite_range_end) or 
+            does_sched_event_completely_overlap_with_invite(sched_event_start, sched_event_end, invite_range_start, invite_range_end)):
+            user_events["events"].pop(index)
 
-    ### reset the index
-    index = 0
-    for busy_time in user_events["busy_times"]:
-
+     # Iterate backwards for busy times as well
+    for index in reversed(range(len(user_events["busy_times"]))):
+        busy_time = user_events["busy_times"][index]
         sched_event_start: datetime = busy_time["start"]
         sched_event_end: datetime = busy_time["end"]
 
-        if does_sched_event_overlap_with_invite(sched_event_start,sched_event_end,invite_range_start,invite_range_end) == False:
-            ### Remove that entry from the data
-            del user_events["busy_times"][index]
-        elif does_sched_event_completely_overlap_with_invite(sched_event_start,sched_event_end,invite_range_start,invite_range_end) == True:
-            del user_events["busy_times"][index]
-        index += 1
+        if (not does_sched_event_overlap_with_invite(sched_event_start, sched_event_end, invite_range_start, invite_range_end) or 
+            does_sched_event_completely_overlap_with_invite(sched_event_start, sched_event_end, invite_range_start, invite_range_end)):
+            user_events["busy_times"].pop(index)
 
     return user_events
 
@@ -172,10 +196,26 @@ def does_sched_event_completely_overlap_with_invite(sched_event_start: datetime,
 
 
 def main():
-
     file = "test_cal_files/test.ics"
-    data = parse_ical_file(file)
-    print(data["events"])
+
+    range_start: datetime = datetime(2024,10,1,14,30,0)
+    range_end: datetime = datetime(2024,10,20,14,30,0)
+    tz = timezone(timedelta(hours=3))  # UTC+3
+
+    ### Make sure that ALL DATES are in UTC
+    range_start_with_timezone = range_start.replace(tzinfo=tz)
+    range_end_with_timezone = range_end.replace(tzinfo=tz)
+    
+
+    user_cal: dict = parse_ical_file(file)
+    print(user_cal)
+    print("_______________________________________________________________")
+    print("_______________________________________________________________")
+    print("_______________________________________________________________")
+    print("_______________________________________________________________")
+    user_cal_filtered = filter_out_events_outside_range(user_events=user_cal,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
+    
+    print(user_cal_filtered)
 
 if __name__ == "__main__":
     main()
