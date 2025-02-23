@@ -1,7 +1,7 @@
 import icalendar
 from icalendar import Calendar
 import json
-from datetime import datetime, _Time, date
+from datetime import datetime, time, date
 import pytz
 
 def convert_user_json_calendar_to_ics() -> dict:
@@ -14,7 +14,7 @@ def convert_json_to_dict(json_file_path) -> dict:
     return data
 
 # Convert all datetimes to UTC
-def convert_to_utc(dt:datetime) -> datetime:
+def convert_datetime_to_utc(dt: datetime) -> datetime:
     # Check if datetime is naive (doesn't have timezone info)
     if dt.tzinfo is None:
         # If it's naive, localize it to UTC
@@ -26,15 +26,15 @@ def convert_to_utc(dt:datetime) -> datetime:
     return dt
 
 
-def convert_timestamp_to_time_object(time_stamp:str) -> _Time:
+def convert_timestamp_to_time_object(time_stamp:str) -> time:
     """
-    Time stamp is in the form
+    Time stamp is in the form 2025-02-22T23:00:00.000+00:00
 
     Args:
         time_stamp (str): _description_
 
     Returns:
-        _Time: _description_
+        time: _description_
     """
     #Convert to datetime object (parsing the ISO 8601 format)
     dt = datetime.fromisoformat(time_stamp.replace("Z", "+00:00"))
@@ -46,6 +46,23 @@ def convert_timestamp_to_time_object(time_stamp:str) -> _Time:
     utc_time = utc_dt.time()
 
     return utc_time
+
+def convert_timestamp_to_datetime_object(time_stamp:str) -> datetime:
+    """
+    Time stamp is in the form 2025-02-22T23:00:00.000+00:00
+
+    Args:
+        time_stamp (str): _description_
+
+    Returns:
+        datetime: _description_
+    """
+     #Convert to datetime object (parsing the ISO 8601 format)
+    dt = datetime.fromisoformat(time_stamp.replace("Z", "+00:00"))
+
+    # Convert to UTC (if not already)
+    utc_dt = dt.astimezone(pytz.UTC)
+    return utc_dt
 def convert_str_to_datetime_object(date:str) -> datetime:
     """
     String is in the form month/day/year
