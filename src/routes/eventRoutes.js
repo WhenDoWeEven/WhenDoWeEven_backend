@@ -10,7 +10,7 @@ router.post('/create', validateEvent, eventController.createEvent); //done
 router.post('/uploadCal', auth, eventController.uploadCal); //done
 router.post('/manualSel', auth, eventController.manualSel);
 router.get('/recommendations', auth, eventController.recommendations); //done
-router.post('/upvote', auth, eventController.upvote);
-router.post('/finalizeTime', auth, eventController.finalizeTime);
+router.post('/upvote', auth, eventController.upvote); //done
+router.post('/creatorDecisition', auth, eventController.creatorDecisition); //done
 
 module.exports = router;
