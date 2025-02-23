@@ -1,15 +1,16 @@
 import json
 import icalendar
 from cal_parser import parser, convert
-from mongoDB import upload_data
+
 from pathlib import Path
 import argparse
-from datetime import datetime, _Time
+from datetime import datetime, time
 from pymongo import MongoClient
 
 from whendoweeven.py_src.rec_algo.find_times_algo import find_free_times
 from cal_parser.parser import is_cal_file,is_url,parse_json_name, get_path_from_filename, parse_ical_file
-from mongoDB.retrieve_data import get_preferred_dates_and_times, 
+from mongoDB.retrieve_data import get_preferred_dates_and_times, get_db_event_document
+from mongoDB.upload_data import 
 from mongoDB.configure import connect_to_mongoDB
 
 def get_user_json_calendar(user_json_cal: json) -> dict:
@@ -68,10 +69,11 @@ if __name__ == "__main__":
     
 
     ### GET EVENT INFO From MONGO ###
-    invite_info: dict = get_preferred_dates_and_times(event_id)
-    pref_dates: list[datetime]
-    invite_start: _Time = invite_info["startdatetime"]
-    invite_end: _Time = invite_info["start_time"]
+    event_dict = get_db_event_document(CLIENT,event_id)
+    invite_info: dict = get_preferred_dates_and_times(event_dict)
+    pref_dates: list[datetime] = invite_info["dates"]
+    invite_start: time = invite_info["start_time"]
+    invite_end: time = invite_info["end_time"]
 
     if parse_json_name(filename) == "upload" and is_cal_file(filename):
         PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)

@@ -58,6 +58,9 @@ def add_test_preferred_dates(client: MongoClient, test_event_id: str, date: str)
         {"eventId": test_event_id},  # Filter to match the specific document
         {"$push": {"preferedDates": date}}  # Add the new field with the list of pairs
     )
+
+def add_user_free_time(client: MongoClient, user_id: str) -> None:
+    pass
 def update_user_free_time(client: MongoClient):
     pass
 def update_group_free_time(client: MongoClient):
