@@ -31,13 +31,15 @@ def is_url(input_str: str) -> bool:
     """
     return input_str.startswith(("http://", "https://"))
 
-def fetch_and_parse_ical(url: str):
+def parse_ical_url(url: str)-> dict[str,list]:
     """
     Fetches an .ics calendar from a URL and parses its events.
 
     :param url: The URL of the iCalendar (.ics) file.
     :return: List of event dictionaries containing summary, start, and end times.
     """
+    parsed_data: dict[str,list] = {"events": [], 
+                                   "busy_times": []}
     try:
         # Fetch the .ics file content
         response = requests.get(url)
@@ -46,21 +48,73 @@ def fetch_and_parse_ical(url: str):
         # Parse the calendar
         cal = icalendar.Calendar.from_ical(response.content)
 
-        events = []
+    #     events = []
+    #     for component in cal.walk():
+    #         if component.name == "VEVENT":
+    #             event = {
+    #                 "summary": str(component.get('summary')),
+    #                 "start": component.get('dtstart').dt,  # Can be datetime or date
+    #                 "end": component.get('dtend').dt
+    #             }
+    #             events.append(event)
+
+    #     return events
+        # Iterate over the calendar components
         for component in cal.walk():
+            # Check for VEVENT (Event)
             if component.name == "VEVENT":
-                event = {
-                    "summary": str(component.get('summary')),
-                    "start": component.get('dtstart').dt,  # Can be datetime or date
-                    "end": component.get('dtend').dt
+
+                start_time = ensure_datetime(component.get('dtstart').dt)
+                end_time = ensure_datetime(component.get('dtend').dt)
+
+                # Convert start and end times to UTC
+                start_time = convert_to_utc(start_time)
+                end_time = convert_to_utc(end_time)
+
+                if str(component.get('summary')) == 'Busy':
+                    busy_time = {
+                    "start": start_time,
+                    "end": end_time,
+                    "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
+                    }
+                    parsed_data["busy_times"].append(busy_time)
+                else:
+                    event = {
+                        "summary": str(component.get('summary')),
+                        "start": start_time,
+                        "end": end_time
+                    }
+                    parsed_data["events"].append(event)
+                
+            # Check for VFREEBUSY (Busy Time)
+            elif component.name == "VFREEBUSY":
+                start_time = ensure_datetime(component.get('dtstart').dt)
+                end_time = ensure_datetime(component.get('dtend').dt)
+
+                # Convert start and end times to UTC
+                start_time = convert_to_utc(start_time)
+                end_time = convert_to_utc(end_time)
+
+                busy_time = {
+                    "start": start_time,
+                    "end": end_time,
+                    "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
                 }
-                events.append(event)
+                parsed_data["busy_times"].append(busy_time)
+        
 
-        return events
-
+        # Sort events and busy times by their start time
+        parsed_data["events"].sort(key=lambda x: x["start"])  # Sort events by start time
+        parsed_data["busy_times"].sort(key=lambda x: x["start"])  # Sort busy times by start time
+        
+            
+        return parsed_data
+    
+        
     except requests.exceptions.RequestException as e:
         print(f"Error fetching the .ics file: {e}")
         return []
+    
 
 def parse_ical_file(file_path: str) -> dict[str,list]:
     """
@@ -78,7 +132,6 @@ def parse_ical_file(file_path: str) -> dict[str,list]:
         # Parse the content using the icalendar library
         cal = Calendar.from_ical(f.read())
 
-    
 
     
     # Iterate over the calendar components
@@ -198,6 +251,11 @@ def does_sched_event_completely_overlap_with_invite(sched_event_start: datetime,
 def main():
     file = "test_cal_files/test.ics"
 
+    with open("test_cal_files/test_url.txt") as url_file:
+        url_content = url_file.read()
+       
+
+
     range_start: datetime = datetime(2024,10,1,14,30,0)
     range_end: datetime = datetime(2024,10,20,14,30,0)
     tz = timezone(timedelta(hours=3))  # UTC+3
@@ -206,16 +264,23 @@ def main():
     range_start_with_timezone = range_start.replace(tzinfo=tz)
     range_end_with_timezone = range_end.replace(tzinfo=tz)
     
-
-    user_cal: dict = parse_ical_file(file)
-    print(user_cal)
+    user_cal_url: dict = parse_ical_url(url_content)
+    print(user_cal_url)
     print("_______________________________________________________________")
     print("_______________________________________________________________")
     print("_______________________________________________________________")
     print("_______________________________________________________________")
-    user_cal_filtered = filter_out_events_outside_range(user_events=user_cal,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
+    user_cal_url_filtered = filter_out_events_outside_range(user_events=user_cal_url,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
+    print(user_cal_url_filtered)
+    # user_cal: dict = parse_ical_file(file)
+    # print(user_cal)
+    # print("_______________________________________________________________")
+    # print("_______________________________________________________________")
+    # print("_______________________________________________________________")
+    # print("_______________________________________________________________")
+    # user_cal_filtered = filter_out_events_outside_range(user_events=user_cal,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
+    # print(user_cal_filtered)
     
-    print(user_cal_filtered)
 
 if __name__ == "__main__":
     main()
