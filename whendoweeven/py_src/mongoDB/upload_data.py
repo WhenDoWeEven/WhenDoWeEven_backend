@@ -3,11 +3,13 @@ import json
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import os
-from dotenv import load_dotenv
 
-def send_user_recs_to_DB(recommendations: json):
+
+def update_user_free_time(client: MongoClient):
+    pass
+def update_group_free_time(client: MongoClient):
     pass
 
-
 if __name__ == "__main__":
-    send_user_recs_to_DB()
+    update_user_free_time()
+    update_group_free_time()

@@ -8,7 +8,7 @@ from datetime import datetime
 from pymongo import MongoClient
 
 from whendoweeven.py_src.rec_algo.find_times_algo import find_free_times
-from cal_parser.parser import is_cal_file,is_url,parse_json_name, get_path_from_filename
+from cal_parser.parser import is_cal_file,is_url,parse_json_name, get_path_from_filename, parse_ical_file
 from mongoDB.retrieve_data import get_preferred_dates_and_times, 
 from mongoDB.configure import connect_to_mongoDB
 
@@ -64,14 +64,25 @@ if __name__ == "__main__":
 
     filename, event_id = process_args()
 
-    client: MongoClient = connect_to_mongoDB()
+    CLIENT: MongoClient = connect_to_mongoDB()
+    
 
+    ### GET EVENT INFO From MONGO ###
     invite_info: dict = get_preferred_dates_and_times(event_id)
 
     invite_start: datetime = invite_info["start"]
     invite_end: datetime
     if parse_json_name(filename) == "upload" and is_cal_file(filename):
         PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)
+        ### pull in the file
+        ### process the file
+        user_time_dict: dict = parse_ical_file(PATH_TO_FILE)
+
+
+
+        ### put all free times under the user
+        ### get the free times for the entire event 
+        ### update the event in mongo
 
         
 
