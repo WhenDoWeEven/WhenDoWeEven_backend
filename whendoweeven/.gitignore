@@ -3,7 +3,7 @@
 .env
 
 ### Test Data
-src/cal-parser/test_cal_files/*
+src/cal-parser/test_cal_files/test.ics
 
 ### Parser Logs
-src/cal-parser/parser-logs/*
+src/cal-parser/parser-logs/debug_logs.log
