@@ -2,15 +2,16 @@ import icalendar
 from icalendar import Calendar
 import json
 
+from pymongo import MongoClient
 
+def get_
 
-
-def get_preferred_dates_and_times(event_id:str) -> dict
+def get_preferred_dates_and_times(client: MongoClient, event_id:str) -> dict
 
     ### Convert dates into datetime objects with the UTC timezone
     ###
     
-    
+
     return {
         "dates":,
         "start_time":,

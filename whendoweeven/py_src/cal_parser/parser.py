@@ -185,9 +185,26 @@ def parse_ical_file(file_path: str) -> dict[str,list]:
     
     return parsed_data
 
+def parse_json_name(json_name:str) -> str:
+    words_to_check = ["google", "apple", "microsoft", "upload", "url"]
 
+    for word in words_to_check:
+        if word.lower() in json_name.lower():
+            return word
 
+    return "No match found"
 
+def get_path_from_filename(base_dir: Path,filename:str) -> Path:
+    # Create the new path by joining the base directory with the filename
+    new_path = base_dir / filename
+
+    # Check if the path exists
+    if new_path.exists():
+        print(f"Path exists: {new_path}")
+    else:
+        print(f"Path does not exist: {new_path}")
+    
+    return new_path
 
 def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetime ,invite_range_end:datetime) -> dict[str,list[dict]]:
     
