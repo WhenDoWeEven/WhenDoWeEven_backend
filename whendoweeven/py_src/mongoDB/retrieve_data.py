@@ -8,10 +8,10 @@ from pymongo import MongoClient
 from bson import ObjectId
 from collections import defaultdict
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from cal_parser.convert import convert_str_to_datetime_object, convert_timestamp_to_datetime_object, convert_datetime_to_time
 from mongoDB.configure import connect_to_mongoDB
+from cal_parser.parser import parse_json_name
 
 DATABASE = "BRICKHACK11"
 

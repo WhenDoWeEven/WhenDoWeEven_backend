@@ -5,14 +5,6 @@ import argparse
 from datetime import datetime, time
 from pymongo import MongoClient
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
-
-from rec_algo.find_times_algo import find_free_times
-from cal_parser.convert import convert_user_json_calendar_to_ics
-from mongoDB.retrieve_data import get_preferred_dates_and_times, get_db_event_document
-from mongoDB.upload_data import add_user_free_time,add_group_event_free_time, update_user_free_time,update_group_event_free_time
-from mongoDB.configure import connect_to_mongoDB
 
 def get_user_json_calendar(user_json_cal: json) -> dict:
     # user_dict_cal = convert_user_json_calendar_to_dict(user_json_cal)

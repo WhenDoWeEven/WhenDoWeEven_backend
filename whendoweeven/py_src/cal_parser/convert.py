@@ -1,12 +1,11 @@
-import icalendar
 from icalendar import Calendar
 import json
 from datetime import datetime, time, date
 import pytz
-import sys
-from pathlib import Path
+import importlib
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+
 
 def convert_user_json_calendar_to_ics() -> dict:
     pass
@@ -28,6 +27,11 @@ def convert_datetime_to_utc(dt: datetime) -> datetime:
         # If it's aware, convert to UTC
         dt = dt.astimezone(pytz.utc)
     return dt
+# Helper function to convert to datetime if it's a date object
+def convert_date_obj_to_datetime_obj(obj):
+    if isinstance(obj, date) and not isinstance(obj,datetime):
+        return datetime.combine(obj, datetime.min.time())
+    return obj
 
 def convert_datetime_to_time(dt: datetime) -> time:
     """
@@ -107,11 +111,7 @@ def convert_str_to_datetime_object(date:str) -> datetime:
 
     return date_obj_utc
 
-# Helper function to convert to datetime if it's a date object
-def convert_date_obj_to_datetime_obj(obj):
-    if isinstance(obj, date) and not isinstance(obj,datetime):
-        return datetime.combine(obj, datetime.min.time())
-    return obj
+
 
 
 

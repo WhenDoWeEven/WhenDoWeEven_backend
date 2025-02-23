@@ -1,19 +1,11 @@
-import icalendar
-from typing import Optional, Any
-import json
 import sys
 import requests
 import logging
 import icalendar
 from icalendar import Calendar
-from datetime import datetime, timezone, timedelta, date
+from datetime import datetime, timezone, timedelta
 from pytz import UTC
 from pathlib import Path
-
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
-
-from cal_parser.convert import convert_date_obj_to_datetime_obj
 
 
 """
@@ -129,67 +121,6 @@ def is_cal_file(filename) -> bool:
     else:
         return False
     
-def parse_ical_file(file_path: str) -> dict[str,list]:
-    """
-    Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
-    Sorts from earliest to latest
-    
-    :param file_path: Path to the .ics file.
-    :return: Dictionary with events and busy times.
-    """
-    # Initialize a dictionary to hold events and busy times
-    parsed_data: dict[str,list] = {"events": [], 
-                                   "busy_times": []}
-    
-    # Open and read the .ics file
-    with open(file_path, 'rb') as f:
-        # Parse the content using the icalendar library
-        cal = Calendar.from_ical(f.read())
-
-
-    
-    # Iterate over the calendar components
-    for component in cal.walk():
-        # Check for VEVENT (Event)
-        if component.name == "VEVENT":
-
-            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
-            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
-
-            # Convert start and end times to UTC
-            start_time = convert_to_utc(start_time)
-            end_time = convert_to_utc(end_time)
-
-            event = {
-                "summary": str(component.get('summary')),
-                "start": start_time,
-                "end": end_time
-            }
-            parsed_data["events"].append(event)
-        
-        # Check for VFREEBUSY (Busy Time)
-        elif component.name == "VFREEBUSY":
-            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
-            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
-
-            # Convert start and end times to UTC
-            start_time = convert_to_utc(start_time)
-            end_time = convert_to_utc(end_time)
-
-            busy_time = {
-                "start": start_time,
-                "end": end_time,
-                "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
-            }
-            parsed_data["busy_times"].append(busy_time)
-    
-
-    # Sort events and busy times by their start time
-    parsed_data["events"].sort(key=lambda x: x["start"])  # Sort events by start time
-    parsed_data["busy_times"].sort(key=lambda x: x["start"])  # Sort busy times by start time
-    
-    
-    return parsed_data
 
 def parse_json_name(json_name:str) -> str:
     words_to_check = ["google", "apple", "microsoft", "upload", "url"]
@@ -253,7 +184,71 @@ def does_sched_event_completely_overlap_with_invite(sched_event_start: datetime,
         return True
     return False
     
+
+
+def parse_ical_file(file_path: str) -> dict[str,list]:
+    """
+    Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
+    Sorts from earliest to latest
     
+    :param file_path: Path to the .ics file.
+    :return: Dictionary with events and busy times.
+    """
+    # Initialize a dictionary to hold events and busy times
+    parsed_data: dict[str,list] = {"events": [], 
+                                   "busy_times": []}
+    
+    # Open and read the .ics file
+    with open(file_path, 'rb') as f:
+        # Parse the content using the icalendar library
+        cal = Calendar.from_ical(f.read())
+
+
+    
+    # Iterate over the calendar components
+    for component in cal.walk():
+        # Check for VEVENT (Event)
+        if component.name == "VEVENT":
+
+            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
+
+            # Convert start and end times to UTC
+            start_time = convert_datetime_to_utc(start_time)
+            end_time = convert_datetime_to_utc(end_time)
+
+            event = {
+                "summary": str(component.get('summary')),
+                "start": start_time,
+                "end": end_time
+            }
+            parsed_data["events"].append(event)
+        
+        # Check for VFREEBUSY (Busy Time)
+        elif component.name == "VFREEBUSY":
+            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
+
+            # Convert start and end times to UTC
+            start_time = convert_to_utc(start_time)
+            end_time = convert_to_utc(end_time)
+
+            busy_time = {
+                "start": start_time,
+                "end": end_time,
+                "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
+            }
+            parsed_data["busy_times"].append(busy_time)
+    
+
+    # Sort events and busy times by their start time
+    parsed_data["events"].sort(key=lambda x: x["start"])  # Sort events by start time
+    parsed_data["busy_times"].sort(key=lambda x: x["start"])  # Sort busy times by start time
+    
+    
+    return parsed_data
+
+
 if __name__ == "__main__":
     file = "test_cal_files/test.ics"
 
@@ -293,7 +288,7 @@ if __name__ == "__main__":
     print("_______________________________________________________________")
     print(user_cal_filtered)
 
-    free_times: list[tuple[datetime,datetime]] = CREATE_RECS.find_free_times(filtered_user_events=user_cal_filtered,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
+    free_times: list[tuple[datetime,datetime]] = find_free_times(filtered_user_events=user_cal_filtered,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
     print("                         FREE TIMES                            ")
     print("_______________________________________________________________")
     print("_______________________________________________________________")
