@@ -52,6 +52,12 @@ def add_test_event_id_to_user(client: MongoClient,event_id:str,user_id:str):
         {"_id": user_oid},  # Filter to match the specific document
         {"$set": {"eventId": event_id}}  # Add the new field with the list of pairs
     )
+
+def add_test_preferred_dates(client: MongoClient, test_event_id: str, date: str) -> None:
+    client[DATABASE][EVENTS_COLLECTION].update_one(
+        {"eventId": test_event_id},  # Filter to match the specific document
+        {"$push": {"preferedDates": date}}  # Add the new field with the list of pairs
+    )
 def update_user_free_time(client: MongoClient):
     pass
 def update_group_free_time(client: MongoClient):
@@ -67,12 +73,20 @@ if __name__ == "__main__":
                                         ["2024-01-15T12:34:56.000+00:00","2024-03-18T09:47:12.000+00:00"],
                                         ["2024-05-05T14:23:39.000+00:00","2024-07-12T20:55:01.000+00:00"],
                                         ["2024-09-09T08:11:44.000+00:00","2024-11-02T16:03:18.000+00:00"]]
-    
+    pref_dates: list[str] = ["11/04/2024",
+                            "01/12/2024",
+                            "01/06/2024",
+                            "07/04/2024"]
     # for user_id, user_timestamp in zip(test_user_ids,test_user_timestamps):
     #     add_test_free_times_to_user(client,user_id,field_value=user_timestamp)
 
-    for user_id in test_user_ids:
-        add_test_event_id_to_user(client,test_event_id,user_id)
+    # for user_id in test_user_ids:
+    #     add_test_event_id_to_user(client,test_event_id,user_id)
+
+    for date in pref_dates:
+        add_test_preferred_dates(client,test_event_id, date)
 
     # update_user_free_time()
     # update_group_free_time()
+
+    client.close()

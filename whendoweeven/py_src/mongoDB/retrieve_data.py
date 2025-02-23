@@ -82,7 +82,7 @@ def get_preferred_dates_and_times(event_dict: dict) -> dict:
     pref_datetime_objects: list[datetime] = []
 
     ### These have to be time objects because a meeting on a various day can only happen between these times
-    ### I have to re-write the other functions where I assumed that start and end were datetime objects
+    
     start_time: time = convert_timestamp_to_time_object(event_dict["startTime"])
     end_time: time = convert_timestamp_to_time_object(event_dict["endTime"])
     
@@ -117,6 +117,6 @@ if __name__ == "__main__":
     
     users_free_time = get_users_free_time_for_event(client,event_id=test_event_id)
     print(users_free_time)
-    # get_preferred_dates_and_times()
+    get_preferred_dates_and_times()
 
     client.close()
