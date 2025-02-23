@@ -124,9 +124,11 @@ def is_cal_file(filename) -> bool:
         return True
     else:
         return False
+    
 def parse_ical_file(file_path: str) -> dict[str,list]:
     """
     Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
+    Sorts from earliest to latest
     
     :param file_path: Path to the .ics file.
     :return: Dictionary with events and busy times.
@@ -246,9 +248,9 @@ def does_sched_event_completely_overlap_with_invite(sched_event_start: datetime,
     if sched_event_start <= invite_range_start and sched_event_end >= invite_range_end:
         return True
     return False
-
-
-def main():
+    
+    
+if __name__ == "__main__":
     file = "test_cal_files/test.ics"
 
     with open("test_cal_files/test_url.txt") as url_file:
@@ -294,7 +296,3 @@ def main():
     print("_______________________________________________________________")
     print("_______________________________________________________________")
     print(free_times)
-    
-
-if __name__ == "__main__":
-    main()
