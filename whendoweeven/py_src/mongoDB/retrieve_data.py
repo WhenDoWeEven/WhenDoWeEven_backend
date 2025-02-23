@@ -4,7 +4,7 @@ from bson import ObjectId
 from collections import defaultdict
 
 from mongoDB.configure import connect_to_mongoDB
-from cal_parser.parser import convert_datetime_to_time,convert_str_to_datetime_object
+from cal_parser.parser import convert_datetime_to_time,convert_str_to_datetime_object, convert_timestamp_to_datetime_object
 
 DATABASE = "BRICKHACK11"
 
@@ -40,7 +40,6 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
     Returns:
         dict[list[tuple[datetime,datetime]]]: Every key will be an Object id. The value is a list of the times that the user is free
     """
-    from cal_parser.convert import convert_timestamp_to_datetime_object
     users_free_time = defaultdict(list)
 
     matching_users = client[DATABASE][USER_COLLECTIION].find({"eventId": event_id})
@@ -69,7 +68,35 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
         users_free_time[user_oid] = free_times
         
     return users_free_time
+def get_event_free_times(client: MongoClient, event_id:str) -> defaultdict[ObjectId, list[tuple[datetime,datetime]]]:
+    users_free_time = defaultdict(list)
 
+    matching_users = client[DATABASE][USER_COLLECTIION].find({"eventId": event_id})
+    
+    user_oid: ObjectId
+    
+    
+    for user in matching_users:
+        user_oid = str(ObjectId(user["_id"]))
+        free_times: list[tuple[datetime,datetime]] = []
+        
+        if "free_times" in user:
+            for free_time in user["free_times"]:
+                # Each free_time is expected to be a pair of timestamps
+                if len(free_time) == 2:
+                    start_time_str = free_time[0]
+                    end_time_str = free_time[1]
+
+                    # Convert timestamp strings to datetime objects
+                    start = convert_timestamp_to_datetime_object(start_time_str)
+                    end = convert_timestamp_to_datetime_object(end_time_str)
+
+                    free_times.append((start, end))
+
+        # Assign the user's free times to the dictionary (keyed by their ObjectId)
+        users_free_time[user_oid] = free_times
+        
+    return users_free_time
 def get_preferred_dates_and_times(event_dict: dict) -> dict:
     pref_dates: list[str] = event_dict["preferedDates"]
     pref_datetime_objects: list[datetime] = []

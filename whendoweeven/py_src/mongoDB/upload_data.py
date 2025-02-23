@@ -1,7 +1,7 @@
 from pymongo.mongo_client import MongoClient
 from pathlib import Path
 from bson import ObjectId
-
+from datetime import datetime
 
 DATABASE = "BRICKHACK11"
 
@@ -51,14 +51,25 @@ def add_test_preferred_dates(client: MongoClient, test_event_id: str, date: str)
         {"$push": {"preferedDates": date}}  # Add the new field with the list of pairs
     )
 
-def add_user_free_time(client: MongoClient, user_id: str) -> None:
-    pass
-def update_user_free_time(client: MongoClient, user_id:str):
-    pass
-def add_group_event_free_time(client:MongoClient, event_id:str):
-    pass
-def update_group_event_free_time(client: MongoClient, event_id: str):
-    pass
+def add_user_free_time(client: MongoClient, user_id: str,free_times:list[datetime]) -> None:
+    
+    for time in free_times:
+        dt_string = time.strftime("%Y-%m-%d %H:%M:%S")
+    
+        client[DATABASE][EVENTS_COLLECTION].update_one(
+            {"_id": ObjectId(user_id)},  # Filter to match the specific document
+            {"$push": {"free_times": dt_string}}  # Add the new field with the list of pairs
+        )
+
+def add_group_event_free_time(client:MongoClient, event_id:str, group_free_times: list[datetime]):
+    for time in group_free_times:
+        dt_string = time.strftime("%Y-%m-%d %H:%M:%S")
+    
+        client[DATABASE][EVENTS_COLLECTION].update_one(
+            {"eventId": ObjectId(event_id)},  # Filter to match the specific document
+            {"$push": {"group_free_times": dt_string}}  # Add the new field with the list of pairs
+        )
+
 
 if __name__ == "__main__":
     # client: MongoClient = connect_to_mongoDB()

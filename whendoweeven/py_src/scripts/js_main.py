@@ -46,9 +46,9 @@ def process_args() -> tuple[str,str]:
     
     return (args.filename,args.event_id, args.user_id)
 
-def run_script(PATH_TO_FILE:str, event_id,user_id):
+def run_script(client: MongoClient, PATH_TO_FILE:str, event_id,user_id):
     ### Get the Event document ###
-        event_document: dict = get_db_event_document(CLIENT,event_id)
+        event_document: dict = get_db_event_document(client,event_id)
         
         ### Get the preferred dates and times
         pref_dates_and_times = get_preferred_dates_and_times(event_dict=event_document)
@@ -67,18 +67,25 @@ def run_script(PATH_TO_FILE:str, event_id,user_id):
             
             free_times.extend(find_free_times(filter_out_events_outside_range(user_events=user_ical_dict,invite_range_start=start_datetime, invite_range_end=end_datetime),start_datetime,end_datetime))
 
-        print(free_times)
-        ### put all free times under the user in mongo
         
+        ### put all free times under the user in mongo
+        add_user_free_time(client,user_id,free_times)
             
         ### get the free times for the entire event 
-        ### update the event in mongo
+        group_free_times = get_group_free_times()
+        ## run the alogorithm 
+        processed_algo_free_times = 
+        ### update the group free times in mongoDB
+        add_group_event_free_time(client,event_id,group_free_times=processed_algo_free_times)
+        
 
 if __name__ == "__main__":
     from cal_parser.parser import parse_json_name, is_cal_file, get_path_from_filename,parse_ical_file, filter_out_events_outside_range
     from mongoDB.configure import connect_to_mongoDB
+    from mongoDB.upload_data import add_user_free_time,add_group_event_free_time
     from mongoDB.retrieve_data import get_db_event_document, get_preferred_dates_and_times
     from rec_algo.find_times_algo import find_free_times
+
     # BASE_DIR = Path("../temp_data")
     BASE_DIR = Path("/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/temp_data")
     # TEST_PATH_TO_JSON = "../../../temp_data/test_google_.json"
