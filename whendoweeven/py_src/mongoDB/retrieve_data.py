@@ -69,34 +69,13 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
         
     return users_free_time
 def get_event_free_times(client: MongoClient, event_id:str) -> defaultdict[ObjectId, list[tuple[datetime,datetime]]]:
-    users_free_time = defaultdict(list)
+    group_free_time = defaultdict(list)
+    event_doc = get_db_event_document(client,event_id)
 
-    matching_users = client[DATABASE][USER_COLLECTIION].find({"eventId": event_id})
-    
-    user_oid: ObjectId
-    
-    
-    for user in matching_users:
-        user_oid = str(ObjectId(user["_id"]))
-        free_times: list[tuple[datetime,datetime]] = []
-        
-        if "free_times" in user:
-            for free_time in user["free_times"]:
-                # Each free_time is expected to be a pair of timestamps
-                if len(free_time) == 2:
-                    start_time_str = free_time[0]
-                    end_time_str = free_time[1]
-
-                    # Convert timestamp strings to datetime objects
-                    start = convert_timestamp_to_datetime_object(start_time_str)
-                    end = convert_timestamp_to_datetime_object(end_time_str)
-
-                    free_times.append((start, end))
-
-        # Assign the user's free times to the dictionary (keyed by their ObjectId)
-        users_free_time[user_oid] = free_times
-        
-    return users_free_time
+    event_free_times = event_doc["preferedDates"]
+    for free_time in event_free_times:
+    ### Laast query
+    return event_free_times
 def get_preferred_dates_and_times(event_dict: dict) -> dict:
     pref_dates: list[str] = event_dict["preferedDates"]
     pref_datetime_objects: list[datetime] = []
