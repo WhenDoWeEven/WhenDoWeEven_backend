@@ -2,6 +2,8 @@ from datetime import datetime
 from cal_parser.parser import parse_ical_file, con
 
 
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 def find_free_times(filtered_user_events: dict[str, list[dict[str, datetime]]], invite_range_start: datetime, invite_range_end: datetime) -> list[tuple[datetime, datetime]]:
     """
     Finds gaps (free times) between already filtered events within an invite range.

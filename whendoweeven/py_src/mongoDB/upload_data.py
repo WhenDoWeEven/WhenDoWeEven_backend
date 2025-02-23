@@ -61,9 +61,11 @@ def add_test_preferred_dates(client: MongoClient, test_event_id: str, date: str)
 
 def add_user_free_time(client: MongoClient, user_id: str) -> None:
     pass
-def update_user_free_time(client: MongoClient):
+def update_user_free_time(client: MongoClient, user_id:str):
     pass
-def update_group_free_time(client: MongoClient):
+def add_group_event_free_time(client:MongoClient, event_id:str):
+    pass
+def update_group_event_free_time(client: MongoClient, event_id: str):
     pass
 
 if __name__ == "__main__":

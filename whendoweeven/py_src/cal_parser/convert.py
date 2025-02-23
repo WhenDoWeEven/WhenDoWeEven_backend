@@ -3,6 +3,10 @@ from icalendar import Calendar
 import json
 from datetime import datetime, time, date
 import pytz
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 def convert_user_json_calendar_to_ics() -> dict:
     pass

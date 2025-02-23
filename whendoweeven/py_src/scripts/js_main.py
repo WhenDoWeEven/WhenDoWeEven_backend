@@ -1,31 +1,32 @@
 import json
-import icalendar
-from cal_parser import parser, convert
-
+import sys
 from pathlib import Path
 import argparse
 from datetime import datetime, time
 from pymongo import MongoClient
 
-from whendoweeven.py_src.rec_algo.find_times_algo import find_free_times
-from cal_parser.parser import is_cal_file,is_url,parse_json_name, get_path_from_filename, parse_ical_file
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+
+from rec_algo.find_times_algo import find_free_times
+from cal_parser.convert import convert_user_json_calendar_to_ics
 from mongoDB.retrieve_data import get_preferred_dates_and_times, get_db_event_document
-from mongoDB.upload_data import 
+from mongoDB.upload_data import add_user_free_time,add_group_event_free_time, update_user_free_time,update_group_event_free_time
 from mongoDB.configure import connect_to_mongoDB
 
 def get_user_json_calendar(user_json_cal: json) -> dict:
-    # user_dict_cal = convert.convert_user_json_calendar_to_dict(user_json_cal)
-    user_ics_cal = convert.convert_user_dict_calendar_to_ics(user_json_cal)
+    # user_dict_cal = convert_user_json_calendar_to_dict(user_json_cal)
+    user_ics_cal = convert_user_json_calendar_to_ics(user_json_cal)
 
 
 def get_user_google_calendar(user_google_cal:json) -> dict:
     
-    # user_dict_cal = convert.convert_user_json_calendar_to_dict(user_google_cal)
-    user_ics_cal = convert.convert_user_json_calendar_to_ics(user_google_cal)
+    # user_dict_cal = convert_user_json_calendar_to_dict(user_google_cal)
+    user_ics_cal = convert_user_json_calendar_to_ics(user_google_cal)
 
 def get_user_apple_calendar(user_apple_cal:json) -> dict:
-    # user_dict_cal = convert.convert_user_json_calendar_to_dict(user_apple_cal)
-    user_ics_cal = convert.convert_user_json_calendar_to_ics()
+    # user_dict_cal = convert_user_json_calendar_to_dict(user_apple_cal)
+    user_ics_cal = convert_user_json_calendar_to_ics()
 
 
 
@@ -69,17 +70,18 @@ if __name__ == "__main__":
     
 
     ### GET EVENT INFO From MONGO ###
-    event_dict = get_db_event_document(CLIENT,event_id)
-    invite_info: dict = get_preferred_dates_and_times(event_dict)
-    pref_dates: list[datetime] = invite_info["dates"]
-    invite_start: time = invite_info["start_time"]
-    invite_end: time = invite_info["end_time"]
+    # event_dict = get_db_event_document(CLIENT,event_id)
+    # invite_info: dict = get_preferred_dates_and_times(event_dict)
+    # pref_dates: list[datetime] = invite_info["dates"]
+    # invite_start: time = invite_info["start_time"]
+    # invite_end: time = invite_info["end_time"]
 
     if parse_json_name(filename) == "upload" and is_cal_file(filename):
         PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)
         ### pull in the file
         ### process the file
-        user_time_dict: dict = parse_ical_file(PATH_TO_FILE)
+        #user_time_dict: dict = parse_ical_file(PATH_TO_FILE)
+        print(PATH_TO_FILE)
 
 
 

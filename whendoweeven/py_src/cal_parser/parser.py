@@ -1,6 +1,7 @@
 import icalendar
 from typing import Optional, Any
 import json
+import sys
 import requests
 import logging
 import icalendar
@@ -8,9 +9,13 @@ from icalendar import Calendar
 from datetime import datetime, timezone, timedelta, date
 from pytz import UTC
 from pathlib import Path
-from convert import convert_to_utc, convert_date_obj_to_datetime_obj
 
-from whendoweeven.py_src.rec_algo import find_times_algo as CREATE_RECS
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+
+from cal_parser.convert import convert_date_obj_to_datetime_obj
+
+from rec_algo.find_times_algo import find_free_times
 
 """
 Calendar file parser based off of RFC 
