@@ -1,15 +1,14 @@
+import icalendar
+from icalendar import Calendar
 
 
-
-def get_user_json_calendar() -> dict:
+def convert_user_json_calendar_to_dict() -> dict:
     pass
 
-j
-
-def convert_dict_cal_to_ics() -> Calendar:
+def convert_user_dict_calendar_to_ics() -> Calendar:
     pass
 
 
 if __name__ == "__main__":
-    get_user_json_calendar()
-    convert_dict_cal_to_ics()
+    convert_user_json_calendar_to_dict()
+    convert_user_dict_calendar_to_ics()
