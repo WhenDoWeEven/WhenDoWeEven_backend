@@ -1,15 +1,7 @@
-from typing import Any, Optional
-import json
 from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-import os
-import sys
 from pathlib import Path
 from bson import ObjectId
 
-
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-from mongoDB.configure import connect_to_mongoDB
 
 DATABASE = "BRICKHACK11"
 
@@ -58,13 +50,18 @@ def add_test_preferred_dates(client: MongoClient, test_event_id: str, date: str)
         {"eventId": test_event_id},  # Filter to match the specific document
         {"$push": {"preferedDates": date}}  # Add the new field with the list of pairs
     )
-def update_user_free_time(client: MongoClient):
+
+def add_user_free_time(client: MongoClient, user_id: str) -> None:
     pass
-def update_group_free_time(client: MongoClient):
+def update_user_free_time(client: MongoClient, user_id:str):
+    pass
+def add_group_event_free_time(client:MongoClient, event_id:str):
+    pass
+def update_group_event_free_time(client: MongoClient, event_id: str):
     pass
 
 if __name__ == "__main__":
-    client: MongoClient = connect_to_mongoDB()
+    # client: MongoClient = connect_to_mongoDB()
     test_event_id: str =  "449195fd-4a05-46c0-9aa0-3cb5a4c9f4ef"
     test_user_ids: list[str] = ["67ba8fbdcb8cdd000fd26a28","67ba45a041da73b6d81044e7","67ba456440a2264064b359b8","67ba44e46354dd7b14a6fa5b","67ba44a804c9619c2c0fda51","67ba448e6ee18d03ddc3b8a6"]
     test_user_timestamps: list[str] = [["2024-01-01T00:00:00.000+00:00","2024-03-01T00:00:00.000+00:00"],

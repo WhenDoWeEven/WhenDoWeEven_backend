@@ -1,16 +1,13 @@
-import icalendar
-from typing import Optional, Any
-import json
 import requests
+import json
 import logging
 import icalendar
 from icalendar import Calendar
-from datetime import datetime, timezone, timedelta, date
+from datetime import datetime, timezone, timedelta, time, date
 from pytz import UTC
 from pathlib import Path
-from convert import convert_to_utc, convert_date_obj_to_datetime_obj
+import pytz
 
-from whendoweeven.py_src.rec_algo import find_times_algo as CREATE_RECS
 
 """
 Calendar file parser based off of RFC 
@@ -19,7 +16,7 @@ Calendar file parser based off of RFC
 
 ### TO-DO --> add a neurodivergent mode!
 # Configure logging
-logging.basicConfig(filename="parser-logs/debug_logs.log",level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(filename="track.logs",level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def is_url(input_str: str) -> bool:
     """
@@ -40,6 +37,8 @@ def parse_ical_url(url: str)-> dict[str,list]:
     :param url: The URL of the iCalendar (.ics) file.
     :return: List of event dictionaries containing summary, start, and end times.
     """
+    from convert import convert_date_obj_to_datetime_obj, convert_to_utc
+
     parsed_data: dict[str,list] = {"events": [], 
                                    "busy_times": []}
     try:
@@ -125,67 +124,6 @@ def is_cal_file(filename) -> bool:
     else:
         return False
     
-def parse_ical_file(file_path: str) -> dict[str,list]:
-    """
-    Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
-    Sorts from earliest to latest
-    
-    :param file_path: Path to the .ics file.
-    :return: Dictionary with events and busy times.
-    """
-    # Initialize a dictionary to hold events and busy times
-    parsed_data: dict[str,list] = {"events": [], 
-                                   "busy_times": []}
-    
-    # Open and read the .ics file
-    with open(file_path, 'rb') as f:
-        # Parse the content using the icalendar library
-        cal = Calendar.from_ical(f.read())
-
-
-    
-    # Iterate over the calendar components
-    for component in cal.walk():
-        # Check for VEVENT (Event)
-        if component.name == "VEVENT":
-
-            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
-            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
-
-            # Convert start and end times to UTC
-            start_time = convert_to_utc(start_time)
-            end_time = convert_to_utc(end_time)
-
-            event = {
-                "summary": str(component.get('summary')),
-                "start": start_time,
-                "end": end_time
-            }
-            parsed_data["events"].append(event)
-        
-        # Check for VFREEBUSY (Busy Time)
-        elif component.name == "VFREEBUSY":
-            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
-            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
-
-            # Convert start and end times to UTC
-            start_time = convert_to_utc(start_time)
-            end_time = convert_to_utc(end_time)
-
-            busy_time = {
-                "start": start_time,
-                "end": end_time,
-                "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
-            }
-            parsed_data["busy_times"].append(busy_time)
-    
-
-    # Sort events and busy times by their start time
-    parsed_data["events"].sort(key=lambda x: x["start"])  # Sort events by start time
-    parsed_data["busy_times"].sort(key=lambda x: x["start"])  # Sort busy times by start time
-    
-    
-    return parsed_data
 
 def parse_json_name(json_name:str) -> str:
     words_to_check = ["google", "apple", "microsoft", "upload", "url"]
@@ -249,12 +187,206 @@ def does_sched_event_completely_overlap_with_invite(sched_event_start: datetime,
         return True
     return False
     
-    
-if __name__ == "__main__":
-    file = "test_cal_files/test.ics"
 
-    with open("test_cal_files/test_url.txt") as url_file:
-        url_content = url_file.read()
+
+def parse_ical_file(file_path: str) -> dict[str,list]:
+    """
+    Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
+    Sorts from earliest to latest
+    
+    :param file_path: Path to the .ics file.
+    :return: Dictionary with events and busy times.
+    """
+    
+    # Initialize a dictionary to hold events and busy times
+    parsed_data: dict[str,list] = {"events": [], 
+                                   "busy_times": []}
+    
+    # Open and read the .ics file
+    with open(file_path, 'rb') as f:
+        # Parse the content using the icalendar library
+        cal = Calendar.from_ical(f.read())
+
+
+    
+    # Iterate over the calendar components
+    for component in cal.walk():
+        # Check for VEVENT (Event)
+        if component.name == "VEVENT":
+
+            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
+
+            # Convert start and end times to UTC
+            start_time = convert_datetime_to_utc(start_time)
+            end_time = convert_datetime_to_utc(end_time)
+
+            event = {
+                "summary": str(component.get('summary')),
+                "start": start_time,
+                "end": end_time
+            }
+            parsed_data["events"].append(event)
+        
+        # Check for VFREEBUSY (Busy Time)
+        elif component.name == "VFREEBUSY":
+            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
+
+            # Convert start and end times to UTC
+            start_time = convert_to_utc(start_time)
+            end_time = convert_to_utc(end_time)
+
+            busy_time = {
+                "start": start_time,
+                "end": end_time,
+                "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
+            }
+            parsed_data["busy_times"].append(busy_time)
+    
+
+    # Sort events and busy times by their start time
+    parsed_data["events"].sort(key=lambda x: x["start"])  # Sort events by start time
+    parsed_data["busy_times"].sort(key=lambda x: x["start"])  # Sort busy times by start time
+    
+    
+    return parsed_data
+
+def convert_user_json_calendar_to_ics() -> dict:
+    pass
+
+def convert_json_to_dict(json_file_path) -> dict:
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+
+    return data
+
+# Convert all datetimes to UTC
+def convert_datetime_to_utc(dt: datetime) -> datetime:
+    # Check if datetime is naive (doesn't have timezone info)
+    if dt.tzinfo is None:
+        # If it's naive, localize it to UTC
+        tz = pytz.utc
+        dt = tz.localize(dt)  # Make it aware in UTC
+    else:
+        # If it's aware, convert to UTC
+        dt = dt.astimezone(pytz.utc)
+    return dt
+# Helper function to convert to datetime if it's a date object
+def convert_date_obj_to_datetime_obj(obj):
+    if isinstance(obj, date) and not isinstance(obj,datetime):
+        return datetime.combine(obj, datetime.min.time())
+    return obj
+
+def convert_datetime_to_time(dt: datetime) -> time:
+    """
+    Convert a datetime object to a time object.
+
+    Args:
+        dt (datetime): The datetime object to convert.
+
+    Returns:
+        time: The time portion of the datetime object.
+    """
+    if isinstance(dt, datetime):
+        tz = pytz.utc
+        dt = tz.localize(dt)
+        return dt.time()  # Extract the time portion from the datetime
+    else:
+        raise ValueError("Expected a datetime object, got {0}".format(type(dt)))
+
+def convert_timestamp_to_time_object(time_stamp:str) -> time:
+    """
+    Time stamp is in the form 2025-02-22T23:00:00.000+00:00
+
+    Args:
+        time_stamp (str): _description_
+
+    Returns:
+        time: _description_
+    """
+    #Convert to datetime object (parsing the ISO 8601 format)
+    dt = datetime.fromisoformat(time_stamp.replace("Z", "+00:00"))
+
+    # Convert to UTC (if not already)
+    utc_dt = dt.astimezone(pytz.UTC)
+
+    # Extract only the time (UTC)
+    utc_time = utc_dt.time()
+
+    return utc_time
+
+def convert_timestamp_to_datetime_object(time_stamp:str) -> datetime:
+    """
+    Time stamp is in the form 2025-02-22T23:00:00.000+00:00
+
+    Args:
+        time_stamp (str): _description_
+
+    Returns:
+        datetime: _description_
+    """
+
+    if isinstance(time_stamp, str):
+        if "Z" in time_stamp:  # Handle the "Z" for UTC
+            time_stamp = time_stamp.replace("Z", "+00:00")
+        dt= datetime.fromisoformat(time_stamp)
+    else:
+        raise ValueError(f"Invalid time_stamp format: {time_stamp}")
+    
+
+    # Convert to UTC (if not already)
+    utc_dt = dt.astimezone(pytz.UTC)
+    return utc_dt
+def convert_str_to_datetime_object(date:str) -> datetime:
+    """
+    String is in the form month/day/year
+
+    Args:
+        date (str): _description_
+
+    Returns:
+        datetime: _description_
+    """
+    date_obj = datetime.strptime(date, "%m/%d/%Y")
+
+    # Assign UTC timezone
+    utc_timezone = pytz.utc
+    date_obj_utc = utc_timezone.localize(date_obj)
+
+    return date_obj_utc
+
+
+def convert_to_utc(time_stamp):
+    """
+    Converts a given timestamp to a UTC datetime object.
+
+    Args:
+        time_stamp (datetime): The datetime object to convert.
+
+    Returns:
+        datetime: A UTC datetime object.
+    """
+    if time_stamp.tzinfo is None:
+        # If the datetime is naive (without timezone info), assume it's local time
+        local_tz = pytz.timezone("America/New_York")  # Example local timezone
+        time_stamp = local_tz.localize(time_stamp)
+    
+    # Convert the datetime to UTC
+    utc_time = time_stamp.astimezone(pytz.utc)
+
+    # Return as a naive datetime in UTC (without the timezone info)
+    return utc_time.replace(tzinfo=None)
+
+
+if __name__ == "__main__":
+    from rec_algo.find_times_algo import find_free_times
+    #file = "/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/py_src/cal_parser/test_cal_files/test.ics"
+    BASE_DIR = Path("/Users/jonathanbateman/Programming-Projects/WhenDoWeEven_backend/temp_data/")
+    FILE_NAME = "test_upload.ics"
+    file_path = BASE_DIR / FILE_NAME
+    # with open("test_cal_files/test_url.txt") as url_file:
+    #     url_content = url_file.read()
        
 
 
@@ -274,7 +406,7 @@ if __name__ == "__main__":
     # print("_______________________________________________________________")
     # user_cal_url_filtered = filter_out_events_outside_range(user_events=user_cal_url,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
     # print(user_cal_url_filtered)
-    user_cal: dict = parse_ical_file(file)
+    user_cal: dict = parse_ical_file(file_path)
     print(user_cal)
     print("                      BASE USER CAL                            ")
     print("_______________________________________________________________")
@@ -289,7 +421,7 @@ if __name__ == "__main__":
     print("_______________________________________________________________")
     print(user_cal_filtered)
 
-    free_times: list[tuple[datetime,datetime]] = CREATE_RECS.find_free_times(filtered_user_events=user_cal_filtered,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
+    free_times: list[tuple[datetime,datetime]] = find_free_times(filtered_user_events=user_cal_filtered,invite_range_start=range_start_with_timezone,invite_range_end=range_end_with_timezone)
     print("                         FREE TIMES                            ")
     print("_______________________________________________________________")
     print("_______________________________________________________________")
