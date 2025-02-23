@@ -49,27 +49,29 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
     """
     users_free_time = defaultdict(list)
 
-    matching_users = client[DATABASE][USER_COLLECTIION].find({"evenId": event_id})
+    matching_users = client[DATABASE][USER_COLLECTIION].find({"eventId": event_id})
     
     user_oid: ObjectId
-    free_times: list[tuple[datetime,datetime]] = []
+    
     
     for user in matching_users:
-        user_oid = ObjectId(user["_id"])
-
-        # Prepare the list of free times for each user
+        user_oid = str(ObjectId(user["_id"]))
+        free_times: list[tuple[datetime,datetime]] = []
         
-        for free_time in user["free_times"]:
-            start_time_str = free_time[0]
-            end_time_str = free_time[1]
-            
-            start = convert_timestamp_to_datetime_object(start_time_str)
-            end = convert_timestamp_to_datetime_object(end_time_str)
+        if "free_times" in user:
+            for free_time in user["free_times"]:
+                # Each free_time is expected to be a pair of timestamps
+                if len(free_time) == 2:
+                    start_time_str = free_time[0]
+                    end_time_str = free_time[1]
 
-        
-            free_times.append((start, end))
+                    # Convert timestamp strings to datetime objects
+                    start = convert_timestamp_to_datetime_object(start_time_str)
+                    end = convert_timestamp_to_datetime_object(end_time_str)
 
-        # Assign the free times to the user (by ObjectId)
+                    free_times.append((start, end))
+
+        # Assign the user's free times to the dictionary (keyed by their ObjectId)
         users_free_time[user_oid] = free_times
         
     return users_free_time
@@ -105,12 +107,12 @@ if __name__ == "__main__":
     test_user_ids: list[str] = ["67ba8fbdcb8cdd000fd26a28","67ba45a041da73b6d81044e7","67ba456440a2264064b359b8","67ba44e46354dd7b14a6fa5b","67ba44a804c9619c2c0fda51","67ba448e6ee18d03ddc3b8a6"]
     
     
-    event_dict = get_db_event_document(client,event_id=test_event_id)
-    print("EVENT DICT")
-    print(event_dict)
-    user_dict = get_db_user_document(client,test_user_ids[0])
-    print("USER DICT")
-    print(user_dict)
+    # event_dict = get_db_event_document(client,event_id=test_event_id)
+    # print("EVENT DICT")
+    # print(event_dict)
+    # user_dict = get_db_user_document(client,test_user_ids[0])
+    # print("USER DICT")
+    # print(user_dict)
 
     
     users_free_time = get_users_free_time_for_event(client,event_id=test_event_id)
