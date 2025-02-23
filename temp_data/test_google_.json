@@ -1,0 +1,350 @@
+{
+    "kind": "calendar#events",
+    "etag": "etag12345",
+    "summary": "My Calendar",
+    "description": "This is a description of the calendar.",
+    "updated": "2025-02-22T12:34:56Z",
+    "timeZone": "America/New_York",
+    "accessRole": "owner",
+    "defaultReminders": [
+      {
+        "method": "popup",
+        "minutes": 10
+      }
+    ],
+    "nextPageToken": "nextPageToken123",
+    "nextSyncToken": "nextSyncToken123",
+    "items": [
+      {
+        "kind": "calendar#event",
+        "etag": "etag54321",
+        "id": "event12345",
+        "status": "confirmed",
+        "htmlLink": "https://www.google.com/calendar/event?eid=event12345",
+        "created": "2025-02-20T12:00:00Z",
+        "updated": "2025-02-20T12:30:00Z",
+        "summary": "Team Meeting",
+        "description": "Meeting to discuss project updates.",
+        "location": "Conference Room A",
+        "colorId": "3",
+        "creator": {
+          "id": "user123",
+          "email": "creator@example.com",
+          "displayName": "John Doe",
+          "self": true
+        },
+        "organizer": {
+          "id": "user123",
+          "email": "creator@example.com",
+          "displayName": "John Doe",
+          "self": true
+        },
+        "start": {
+          "dateTime": "2024-10-05T09:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "end": {
+          "dateTime": "2024-10-05T10:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "endTimeUnspecified": false,
+        "recurrence": [],
+        "recurringEventId": "recurring12345",
+        "originalStartTime": {
+          "dateTime": "2024-10-05T09:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "transparency": "opaque",
+        "visibility": "default",
+        "iCalUID": "icalUID12345",
+        "sequence": 1,
+        "attendees": [],
+        "attendeesOmitted": false,
+        "extendedProperties": {},
+        "hangoutLink": "https://hangouts.google.com/call/xyz123",
+        "conferenceData": {},
+        "gadget": {},
+        "anyoneCanAddSelf": true,
+        "guestsCanInviteOthers": true,
+        "guestsCanModify": false,
+        "guestsCanSeeOtherGuests": true,
+        "privateCopy": false,
+        "locked": false,
+        "reminders": {
+          "useDefault": true
+        },
+        "source": {},
+        "workingLocationProperties": {},
+        "outOfOfficeProperties": {},
+        "focusTimeProperties": {},
+        "attachments": [],
+        "birthdayProperties": {},
+        "eventType": "meeting"
+      },
+      {
+        "kind": "calendar#event",
+        "etag": "etag54322",
+        "id": "event12346",
+        "status": "confirmed",
+        "htmlLink": "https://www.google.com/calendar/event?eid=event12346",
+        "created": "2025-02-20T12:05:00Z",
+        "updated": "2025-02-20T12:35:00Z",
+        "summary": "Client Call",
+        "description": "Call with client to discuss feedback.",
+        "location": "Online",
+        "colorId": "5",
+        "creator": {
+          "id": "user124",
+          "email": "creator2@example.com",
+          "displayName": "Jane Smith",
+          "self": true
+        },
+        "organizer": {
+          "id": "user124",
+          "email": "creator2@example.com",
+          "displayName": "Jane Smith",
+          "self": true
+        },
+        "start": {
+          "dateTime": "2024-10-12T13:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "end": {
+          "dateTime": "2024-10-12T14:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "endTimeUnspecified": false,
+        "recurrence": [],
+        "recurringEventId": "recurring12346",
+        "originalStartTime": {
+          "dateTime": "2024-10-12T13:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "transparency": "opaque",
+        "visibility": "default",
+        "iCalUID": "icalUID12346",
+        "sequence": 1,
+        "attendees": [],
+        "attendeesOmitted": false,
+        "extendedProperties": {},
+        "hangoutLink": "https://hangouts.google.com/call/xyz124",
+        "conferenceData": {},
+        "gadget": {},
+        "anyoneCanAddSelf": true,
+        "guestsCanInviteOthers": true,
+        "guestsCanModify": false,
+        "guestsCanSeeOtherGuests": true,
+        "privateCopy": false,
+        "locked": false,
+        "reminders": {
+          "useDefault": true
+        },
+        "source": {},
+        "workingLocationProperties": {},
+        "outOfOfficeProperties": {},
+        "focusTimeProperties": {},
+        "attachments": [],
+        "birthdayProperties": {},
+        "eventType": "meeting"
+      },
+      {
+        "kind": "calendar#event",
+        "etag": "etag54323",
+        "id": "event12347",
+        "status": "confirmed",
+        "htmlLink": "https://www.google.com/calendar/event?eid=event12347",
+        "created": "2025-02-20T12:10:00Z",
+        "updated": "2025-02-20T12:40:00Z",
+        "summary": "Quarterly Review",
+        "description": "Quarterly company performance review.",
+        "location": "Company HQ",
+        "colorId": "2",
+        "creator": {
+          "id": "user125",
+          "email": "creator3@example.com",
+          "displayName": "Bob Williams",
+          "self": true
+        },
+        "organizer": {
+          "id": "user125",
+          "email": "creator3@example.com",
+          "displayName": "Bob Williams",
+          "self": true
+        },
+        "start": {
+          "dateTime": "2024-10-18T09:30:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "end": {
+          "dateTime": "2024-10-18T11:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "endTimeUnspecified": false,
+        "recurrence": [],
+        "recurringEventId": "recurring12347",
+        "originalStartTime": {
+          "dateTime": "2024-10-18T09:30:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "transparency": "opaque",
+        "visibility": "default",
+        "iCalUID": "icalUID12347",
+        "sequence": 1,
+        "attendees": [],
+        "attendeesOmitted": false,
+        "extendedProperties": {},
+        "hangoutLink": "https://hangouts.google.com/call/xyz125",
+        "conferenceData": {},
+        "gadget": {},
+        "anyoneCanAddSelf": true,
+        "guestsCanInviteOthers": true,
+        "guestsCanModify": false,
+        "guestsCanSeeOtherGuests": true,
+        "privateCopy": false,
+        "locked": false,
+        "reminders": {
+          "useDefault": true
+        },
+        "source": {},
+        "workingLocationProperties": {},
+        "outOfOfficeProperties": {},
+        "focusTimeProperties": {},
+        "attachments": [],
+        "birthdayProperties": {},
+        "eventType": "meeting"
+      },
+      {
+        "kind": "calendar#event",
+        "etag": "etag54324",
+        "id": "event12348",
+        "status": "confirmed",
+        "htmlLink": "https://www.google.com/calendar/event?eid=event12348",
+        "created": "2025-02-20T12:15:00Z",
+        "updated": "2025-02-20T12:45:00Z",
+        "summary": "Development Sprint",
+        "description": "Sprint planning for next feature release.",
+        "location": "Online",
+        "colorId": "4",
+        "creator": {
+          "id": "user126",
+          "email": "creator4@example.com",
+          "displayName": "Alice Johnson",
+          "self": true
+        },
+        "organizer": {
+          "id": "user126",
+          "email": "creator4@example.com",
+          "displayName": "Alice Johnson",
+          "self": true
+        },
+        "start": {
+          "dateTime": "2024-11-01T10:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "end": {
+          "dateTime": "2024-11-01T12:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "endTimeUnspecified": false,
+        "recurrence": [],
+        "recurringEventId": "recurring12348",
+        "originalStartTime": {
+          "dateTime": "2024-11-01T10:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "transparency": "opaque",
+        "visibility": "default",
+        "iCalUID": "icalUID12348",
+        "sequence": 1,
+        "attendees": [],
+        "attendeesOmitted": false,
+        "extendedProperties": {},
+        "hangoutLink": "https://hangouts.google.com/call/xyz126",
+        "conferenceData": {},
+        "gadget": {},
+        "anyoneCanAddSelf": true,
+        "guestsCanInviteOthers": true,
+        "guestsCanModify": false,
+        "guestsCanSeeOtherGuests": true,
+        "privateCopy": false,
+        "locked": false,
+        "reminders": {
+          "useDefault": true
+        },
+        "source": {},
+        "workingLocationProperties": {},
+        "outOfOfficeProperties": {},
+        "focusTimeProperties": {},
+        "attachments": [],
+        "birthdayProperties": {},
+        "eventType": "meeting"
+      },
+      {
+        "kind": "calendar#event",
+        "etag": "etag54325",
+        "id": "event12349",
+        "status": "confirmed",
+        "htmlLink": "https://www.google.com/calendar/event?eid=event12349",
+        "created": "2025-02-20T12:20:00Z",
+        "updated": "2025-02-20T12:50:00Z",
+        "summary": "Team Sync",
+        "description": "Synchronize the work progress for the upcoming release.",
+        "location": "Conference Room B",
+        "colorId": "1",
+        "creator": {
+          "id": "user127",
+          "email": "creator5@example.com",
+          "displayName": "Tom Harris",
+          "self": true
+        },
+        "organizer": {
+          "id": "user127",
+          "email": "creator5@example.com",
+          "displayName": "Tom Harris",
+          "self": true
+        },
+        "start": {
+          "dateTime": "2024-11-10T14:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "end": {
+          "dateTime": "2024-11-10T15:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "endTimeUnspecified": false,
+        "recurrence": [],
+        "recurringEventId": "recurring12349",
+        "originalStartTime": {
+          "dateTime": "2024-11-10T14:00:00-05:00",
+          "timeZone": "America/New_York"
+        },
+        "transparency": "opaque",
+        "visibility": "default",
+        "iCalUID": "icalUID12349",
+        "sequence": 1,
+        "attendees": [],
+        "attendeesOmitted": false,
+        "extendedProperties": {},
+        "hangoutLink": "https://hangouts.google.com/call/xyz127",
+        "conferenceData": {},
+        "gadget": {},
+        "anyoneCanAddSelf": true,
+        "guestsCanInviteOthers": true,
+        "guestsCanModify": false,
+        "guestsCanSeeOtherGuests": true,
+        "privateCopy": false,
+        "locked": false,
+        "reminders": {
+          "useDefault": true
+        },
+        "source": {},
+        "workingLocationProperties": {},
+        "outOfOfficeProperties": {},
+        "focusTimeProperties": {},
+        "attachments": [],
+        "birthdayProperties": {},
+        "eventType": "meeting"
+      }
+    ]
+  }
+  
