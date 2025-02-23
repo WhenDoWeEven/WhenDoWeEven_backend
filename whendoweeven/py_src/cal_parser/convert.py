@@ -1,7 +1,7 @@
 import icalendar
 from icalendar import Calendar
 import json
-from datetime import datetime, _Time, date
+from datetime import datetime, time, date
 import pytz
 
 def convert_user_json_calendar_to_ics() -> dict:
@@ -14,7 +14,7 @@ def convert_json_to_dict(json_file_path) -> dict:
     return data
 
 # Convert all datetimes to UTC
-def convert_to_utc(dt:datetime) -> datetime:
+def convert_datetime_to_utc(dt: datetime) -> datetime:
     # Check if datetime is naive (doesn't have timezone info)
     if dt.tzinfo is None:
         # If it's naive, localize it to UTC
@@ -25,16 +25,32 @@ def convert_to_utc(dt:datetime) -> datetime:
         dt = dt.astimezone(pytz.utc)
     return dt
 
-
-def convert_timestamp_to_time_object(time_stamp:str) -> _Time:
+def convert_datetime_to_time(dt: datetime) -> time:
     """
-    Time stamp is in the form
+    Convert a datetime object to a time object.
+
+    Args:
+        dt (datetime): The datetime object to convert.
+
+    Returns:
+        time: The time portion of the datetime object.
+    """
+    if isinstance(dt, datetime):
+        tz = pytz.utc
+        dt = tz.localize(dt)
+        return dt.time()  # Extract the time portion from the datetime
+    else:
+        raise ValueError("Expected a datetime object, got {0}".format(type(dt)))
+
+def convert_timestamp_to_time_object(time_stamp:str) -> time:
+    """
+    Time stamp is in the form 2025-02-22T23:00:00.000+00:00
 
     Args:
         time_stamp (str): _description_
 
     Returns:
-        _Time: _description_
+        time: _description_
     """
     #Convert to datetime object (parsing the ISO 8601 format)
     dt = datetime.fromisoformat(time_stamp.replace("Z", "+00:00"))
@@ -46,6 +62,29 @@ def convert_timestamp_to_time_object(time_stamp:str) -> _Time:
     utc_time = utc_dt.time()
 
     return utc_time
+
+def convert_timestamp_to_datetime_object(time_stamp:str) -> datetime:
+    """
+    Time stamp is in the form 2025-02-22T23:00:00.000+00:00
+
+    Args:
+        time_stamp (str): _description_
+
+    Returns:
+        datetime: _description_
+    """
+
+    if isinstance(time_stamp, str):
+        if "Z" in time_stamp:  # Handle the "Z" for UTC
+            time_stamp = time_stamp.replace("Z", "+00:00")
+        dt= datetime.fromisoformat(time_stamp)
+    else:
+        raise ValueError(f"Invalid time_stamp format: {time_stamp}")
+    
+
+    # Convert to UTC (if not already)
+    utc_dt = dt.astimezone(pytz.UTC)
+    return utc_dt
 def convert_str_to_datetime_object(date:str) -> datetime:
     """
     String is in the form month/day/year
