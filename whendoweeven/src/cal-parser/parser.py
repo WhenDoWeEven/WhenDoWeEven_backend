@@ -54,18 +54,33 @@ def parse_ical_file(file_path: str):
     for component in cal.walk():
         # Check for VEVENT (Event)
         if component.name == "VEVENT":
+
+            start_time = ensure_datetime(component.get('dtstart').dt)
+            end_time = ensure_datetime(component.get('dtend').dt)
+
+            # Convert start and end times to UTC
+            start_time = convert_to_utc(start_time)
+            end_time = convert_to_utc(end_time)
+
             event = {
                 "summary": str(component.get('summary')),
-                "start": ensure_datetime(component.get('dtstart').dt),
-                "end": ensure_datetime(component.get('dtend').dt)
+                "start": start_time,
+                "end": end_time
             }
             parsed_data["events"].append(event)
         
         # Check for VFREEBUSY (Busy Time)
         elif component.name == "VFREEBUSY":
+            start_time = ensure_datetime(component.get('dtstart').dt)
+            end_time = ensure_datetime(component.get('dtend').dt)
+
+            # Convert start and end times to UTC
+            start_time = convert_to_utc(start_time)
+            end_time = convert_to_utc(end_time)
+
             busy_time = {
-                "start": ensure_datetime(component.get('dtstart').dt),
-                "end": ensure_datetime(component.get('dtend').dt),
+                "start": start_time,
+                "end": end_time,
                 "busy_type": str(component.get('freebusy'))  # can be 'busy' or 'free'
             }
             parsed_data["busy_times"].append(busy_time)
