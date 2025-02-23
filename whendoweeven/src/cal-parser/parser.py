@@ -221,15 +221,97 @@ def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetim
     return user_events
 
 def find_free_times(filtered_user_events:dict ,invite_range_start:datetime ,invite_range_end:datetime)-> list[datetime]:
+    """
+    These events have already been determined to be within the range of the invite event because they've gone through filter_out_events_outside_range
+
+    Args:
+        filtered_user_events (dict): _description_
+        invite_range_start (datetime): _description_
+        invite_range_end (datetime): _description_
+
+    Returns:
+        list[datetime]: _description_
+    """
     index: int = 0
-    first_event: datetime = filtered_user_events["events"][index]
-    second_event: datetime = filtered_user_events["events"][index + 1]
+    free_times: list[tuple[datetime,datetime]] = []
+    length: int = len(filtered_user_events["events"])
 
-    if first_event["end"] < second_event["start"]:
-        pass
+    while index < length:
+        first_event_start: datetime = filtered_user_events["events"]["start"][index]
+        first_event_end: datetime = filtered_user_events["events"]["end"][index]
 
+        second_event_start: datetime = filtered_user_events["events"]["start"][index+1]
+        second_event_end: datetime = filtered_user_events["events"]["end"][index+1]
+        
+        if first_event_end <= second_event_start:
+            new_free_time_start = datetime(
+                first_event_end.year,
+                first_event_end.month,
+                first_event_end.day,  # You missed `day` in your code
+                first_event_end.hour,
+                first_event_end.minute,
+                tzinfo=first_event_end.tzinfo  # Carry over the timezone
+            )
+            new_free_time_end = datetime(
+                second_event_start.year,
+                second_event_start.month,
+                second_event_start.day,
+                second_event_start.hour,
+                second_event_start.minute,
+                tzinfo=second_event_start.tzinfo
+            )
 
-    pass
+            free_times.append((new_free_time_start,new_free_time_end))
+            
+        first_event_start = second_event_start
+        first_event_end = second_event_end
+
+        ### increment the index first, then get the next event
+        index+=1
+        second_event_start = filtered_user_events["events"]["start"][index + 1]
+        second_event_end = filtered_user_events["events"]["end"][index + 1]
+
+        
+    
+    index = 0
+    length_2: int = len(filtered_user_events["busy_times"])
+    while index < length_2:
+        first_event_start: datetime = filtered_user_events["busy_times"]["start"][index]
+        first_event_end: datetime = filtered_user_events["busy_times"]["end"][index]
+
+        second_event_start: datetime = filtered_user_events["busy_times"]["start"][index+1]
+        second_event_end: datetime = filtered_user_events["busy_times"]["end"][index+1]
+        
+        if first_event_end <= second_event_start:
+            new_free_time_start = datetime(
+                first_event_end.year,
+                first_event_end.month,
+                first_event_end.day,  # You missed `day` in your code
+                first_event_end.hour,
+                first_event_end.minute,
+                tzinfo=first_event_end.tzinfo  # Carry over the timezone
+            )
+            new_free_time_end = datetime(
+                second_event_start.year,
+                second_event_start.month,
+                second_event_start.day,
+                second_event_start.hour,
+                second_event_start.minute,
+                tzinfo=second_event_start.tzinfo
+            )
+
+            free_times.append((new_free_time_start,new_free_time_end))
+            
+        first_event_start = second_event_start
+        first_event_end = second_event_end
+
+        ### increment the index first, then get the next event
+        index+=1
+        second_event_start = filtered_user_events["busy_times"]["start"][index + 1]
+        second_event_end = filtered_user_events["busy_times"]["end"][index + 1]
+        index+=1
+
+    return free_times
 
 def does_sched_event_overlap_with_invite(sched_event_start: datetime, sched_event_end: datetime, invite_range_start: datetime,invite_range_end: datetime)->bool:
     if sched_event_start > invite_range_start and sched_event_start < invite_range_end:
