@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { recommendations } = require('../controllers/eventController');
 
 const eventSchema = new mongoose.Schema({
     eventId: {
@@ -20,6 +21,10 @@ const eventSchema = new mongoose.Schema({
     description: {
         type: String,
         required: false,
+    },
+    recommendations: {
+        type: Array,
+        required: true,
     },
     preferedDates: {
         type: Array,
