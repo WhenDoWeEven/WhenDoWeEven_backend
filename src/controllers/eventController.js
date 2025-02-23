@@ -42,7 +42,7 @@ const upload = multer({
 // Create a new event
 exports.createEvent = async (req, res) => {
     try {
-        const event = new Event({...req.body, eventId: uuidv4()});
+        const event = new Event({...req.body, eventId: uuidv4(), owner: req.user._id});
         await event.save();
         res.status(201).send(event);
     } catch (error) {
