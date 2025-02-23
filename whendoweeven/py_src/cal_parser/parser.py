@@ -15,7 +15,6 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from cal_parser.convert import convert_date_obj_to_datetime_obj
 
-from rec_algo.find_times_algo import find_free_times
 
 """
 Calendar file parser based off of RFC 
