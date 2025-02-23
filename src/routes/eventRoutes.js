@@ -5,10 +5,11 @@ const auth = require('../middleware/auth');
 const { validateEvent } = require('../middleware/validate');
 
 
+router.get('/home', eventController.home); //done
 router.post('/create', validateEvent, eventController.createEvent); //done
 router.post('/uploadCal', auth, eventController.uploadCal); //done
 router.post('/manualSel', auth, eventController.manualSel);
-router.get('/recommendations', eventController.recommendations);
+router.get('/recommendations', auth, eventController.recommendations); //done
 router.post('/upvote', auth, eventController.upvote);
 router.post('/finalizeTime', auth, eventController.finalizeTime);
 

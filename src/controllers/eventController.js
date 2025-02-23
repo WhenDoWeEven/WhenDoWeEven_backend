@@ -50,8 +50,8 @@ exports.createEvent = async (req, res) => {
     }
 };
 
-// recomendations
-exports.recommendations = async (req, res) => {
+// home
+exports.home = async (req, res) => {
     try {
         const htmlContent = `
         <!DOCTYPE html>
@@ -113,6 +113,23 @@ exports.uploadCal = async (req, res) => {
 // manualSel
 exports.manualSel = async (req, res) => {
     // update the logic here
+};
+
+// recommendations
+exports.recommendations = async (req, res) => {
+    try {
+        const eventId = req.query.eventId;
+        console.log(eventId);
+        const event = await Event.findOne({ eventId: eventId });
+
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        res.status(200).json({ recommendations: event.recommendations });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
 };
 
 // upvote
