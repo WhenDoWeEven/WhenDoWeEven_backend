@@ -25,6 +25,22 @@ def convert_datetime_to_utc(dt: datetime) -> datetime:
         dt = dt.astimezone(pytz.utc)
     return dt
 
+def convert_datetime_to_time(dt: datetime) -> time:
+    """
+    Convert a datetime object to a time object.
+
+    Args:
+        dt (datetime): The datetime object to convert.
+
+    Returns:
+        time: The time portion of the datetime object.
+    """
+    if isinstance(dt, datetime):
+        tz = pytz.utc
+        dt = tz.localize(dt)
+        return dt.time()  # Extract the time portion from the datetime
+    else:
+        raise ValueError("Expected a datetime object, got {0}".format(type(dt)))
 
 def convert_timestamp_to_time_object(time_stamp:str) -> time:
     """
@@ -57,8 +73,14 @@ def convert_timestamp_to_datetime_object(time_stamp:str) -> datetime:
     Returns:
         datetime: _description_
     """
-     #Convert to datetime object (parsing the ISO 8601 format)
-    dt = datetime.fromisoformat(time_stamp.replace("Z", "+00:00"))
+
+    if isinstance(time_stamp, str):
+        if "Z" in time_stamp:  # Handle the "Z" for UTC
+            time_stamp = time_stamp.replace("Z", "+00:00")
+        dt= datetime.fromisoformat(time_stamp)
+    else:
+        raise ValueError(f"Invalid time_stamp format: {time_stamp}")
+    
 
     # Convert to UTC (if not already)
     utc_dt = dt.astimezone(pytz.UTC)

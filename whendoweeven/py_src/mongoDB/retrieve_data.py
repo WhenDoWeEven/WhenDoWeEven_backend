@@ -10,7 +10,7 @@ from collections import defaultdict
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from cal_parser.convert import convert_str_to_datetime_object, convert_timestamp_to_time_object, convert_timestamp_to_datetime_object
+from cal_parser.convert import convert_str_to_datetime_object, convert_timestamp_to_datetime_object, convert_datetime_to_time
 from mongoDB.configure import connect_to_mongoDB
 
 DATABASE = "BRICKHACK11"
@@ -82,9 +82,10 @@ def get_preferred_dates_and_times(event_dict: dict) -> dict:
     pref_datetime_objects: list[datetime] = []
 
     ### These have to be time objects because a meeting on a various day can only happen between these times
-    
-    start_time: time = convert_timestamp_to_time_object(event_dict["startTime"])
-    end_time: time = convert_timestamp_to_time_object(event_dict["endTime"])
+    # print(type(event_dict["startTime"]))
+    # print(type(event_dict["startTime"]))
+    start_time: time = convert_datetime_to_time(event_dict["startTime"])
+    end_time: time = convert_datetime_to_time(event_dict["endTime"])
     
     for date in pref_dates:
         pref_datetime_objects.append(convert_str_to_datetime_object(date))
@@ -115,8 +116,15 @@ if __name__ == "__main__":
     # print(user_dict)
 
     
-    users_free_time = get_users_free_time_for_event(client,event_id=test_event_id)
-    print(users_free_time)
-    get_preferred_dates_and_times()
+    # users_free_time = get_users_free_time_for_event(client,event_id=test_event_id)
+    # print(users_free_time)
+    test_event_dict = get_db_event_document(client,test_event_id)
+    print(test_event_dict)
+    print()
+    print()
+    print()
+    print()
+    pref_dates_and_times = get_preferred_dates_and_times(event_dict=test_event_dict)
+    print(pref_dates_and_times)
 
     client.close()
