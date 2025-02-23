@@ -1,12 +1,16 @@
 import icalendar
 from icalendar import Calendar
 import json
+import sys
+from pathlib import Path
 from datetime import datetime, time
 from pymongo import MongoClient
 from bson import ObjectId
 from collections import defaultdict
 
-from whendoweeven.py_src.cal_parser.convert import convert_str_to_datetime_object, convert_timestamp_to_time_object, convert_timestamp_to_datetime_object
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from cal_parser.convert import convert_str_to_datetime_object, convert_timestamp_to_time_object, convert_timestamp_to_datetime_object
 from mongoDB.configure import connect_to_mongoDB
 
 DATABASE = "BRICKHACK11"
@@ -19,16 +23,16 @@ def get_db_event_document(client: MongoClient, event_id:str) -> dict:
     event_document: dict = client[DATABASE][EVENTS_COLLECTION].find_one({"eventId":event_id})
 
     ### Close connection ###
-    client.close()
+    
 
     return event_document
 
 def get_db_user_document(client: MongoClient, user_id: str) -> dict:
     user_oid: ObjectId = ObjectId(user_id)
-    user_document: dict = client[DATABASE][USER_COLLECTIION].find_one({"_id",user_oid})
+    user_document: dict = client[DATABASE][USER_COLLECTIION].find_one({"_id":user_oid})
 
     ### Close connection ###
-    client.close()
+    #client.close()
     
     return user_document
 
@@ -45,7 +49,7 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
     """
     users_free_time = defaultdict(list)
 
-    matching_users = client[DATABASE][USER_COLLECTIION].find({"evenId":event_id})
+    matching_users = client[DATABASE][USER_COLLECTIION].find({"evenId": event_id})
     
     user_oid: ObjectId
     free_times: list[tuple[datetime,datetime]] = []
@@ -56,7 +60,8 @@ def get_users_free_time_for_event(client: MongoClient, event_id:str) -> defaultd
         # Prepare the list of free times for each user
         
         for free_time in user["free_times"]:
-            start_time_str, end_time_str = free_time 
+            start_time_str = free_time[0]
+            end_time_str = free_time[1]
             
             start = convert_timestamp_to_datetime_object(start_time_str)
             end = convert_timestamp_to_datetime_object(end_time_str)
@@ -90,15 +95,26 @@ def get_preferred_dates_and_times(event_dict: dict) -> dict:
 
     return pref_dict
 
+
 if __name__ == "__main__":
     ### Test the functions
 
     client: MongoClient = connect_to_mongoDB()
 
     test_event_id: str = "449195fd-4a05-46c0-9aa0-3cb5a4c9f4ef"
+    test_user_ids: list[str] = ["67ba8fbdcb8cdd000fd26a28","67ba45a041da73b6d81044e7","67ba456440a2264064b359b8","67ba44e46354dd7b14a6fa5b","67ba44a804c9619c2c0fda51","67ba448e6ee18d03ddc3b8a6"]
+    
     
     event_dict = get_db_event_document(client,event_id=test_event_id)
+    print("EVENT DICT")
     print(event_dict)
-    # get_db_user_document()
-    # get_users_free_time_for_event()
+    user_dict = get_db_user_document(client,test_user_ids[0])
+    print("USER DICT")
+    print(user_dict)
+
+    
+    users_free_time = get_users_free_time_for_event(client,event_id=test_event_id)
+    print(users_free_time)
     # get_preferred_dates_and_times()
+
+    client.close()
