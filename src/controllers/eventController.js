@@ -119,7 +119,6 @@ exports.manualSel = async (req, res) => {
 exports.recommendations = async (req, res) => {
     try {
         const eventId = req.query.eventId;
-        console.log(eventId);
         const event = await Event.findOne({ eventId: eventId });
 
         if (!event) {
@@ -134,7 +133,30 @@ exports.recommendations = async (req, res) => {
 
 // upvote
 exports.upvote = async (req, res) => {
-    // update the logic here
+    try {
+        const { eventId, recommendationId } = req.body;
+        const userId = req.user._id;
+        const event = await Event.findOne({ eventId: eventId });
+
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        const recommendation = event.recommendations.find(rec => rec.id == recommendationId);
+
+        if (!recommendation) {
+            return res.status(404).json({ error: 'Recommendation not found' });
+        }
+
+        recommendation.upvoteCount = (recommendation.upvoteCount || 0) + 1;
+        recommendation.upvoteList.push(userId);
+        updatedEvent = new Event(event);
+        await updatedEvent.save()
+
+        res.status(200).json({ recommendations: updatedEvent.recommendations });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
 };
 
 // finalizeTime
