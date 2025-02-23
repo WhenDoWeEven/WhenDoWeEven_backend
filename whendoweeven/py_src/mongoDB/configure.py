@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 
 
-def test_connection():
+def connect_to_mongoDB() -> MongoClient:
 
     load_dotenv(dotenv_path="../../.env")
     PASSWORD: str = os.getenv("PASSWORD")
@@ -17,9 +17,14 @@ def test_connection():
     try:
         client.admin.command('ping')
         print("Pinged your deployment. You successfully connected to MongoDB!")
+        return client
     except Exception as e:
         print(e)
 
 
 if __name__ == "__main__":
-    test_connection()
+    client: MongoClient = connect_to_mongoDB()
+
+    databases: list[str] = client.list_database_names()
+
+    print(databases)

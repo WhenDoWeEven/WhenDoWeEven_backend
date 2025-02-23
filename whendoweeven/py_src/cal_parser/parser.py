@@ -5,12 +5,12 @@ import requests
 import logging
 import icalendar
 from icalendar import Calendar
-from icalevents import icalevents
 from datetime import datetime, timezone, timedelta, date
-import pytz
 from pytz import UTC
+from pathlib import Path
+from convert import convert_to_utc, convert_date_obj_to_datetime_obj
 
-from src.rec_algo import create_rec_file_times as CREATE_RECS
+from whendoweeven.py_src.rec_algo import find_times_algo as CREATE_RECS
 
 """
 Calendar file parser based off of RFC 
@@ -66,8 +66,8 @@ def parse_ical_url(url: str)-> dict[str,list]:
             # Check for VEVENT (Event)
             if component.name == "VEVENT":
 
-                start_time = ensure_datetime(component.get('dtstart').dt)
-                end_time = ensure_datetime(component.get('dtend').dt)
+                start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+                end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
 
                 # Convert start and end times to UTC
                 start_time = convert_to_utc(start_time)
@@ -90,8 +90,8 @@ def parse_ical_url(url: str)-> dict[str,list]:
                 
             # Check for VFREEBUSY (Busy Time)
             elif component.name == "VFREEBUSY":
-                start_time = ensure_datetime(component.get('dtstart').dt)
-                end_time = ensure_datetime(component.get('dtend').dt)
+                start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+                end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
 
                 # Convert start and end times to UTC
                 start_time = convert_to_utc(start_time)
@@ -117,7 +117,13 @@ def parse_ical_url(url: str)-> dict[str,list]:
         print(f"Error fetching the .ics file: {e}")
         return []
     
+def is_cal_file(filename) -> bool:
+    extension = Path(filename).suffix  # Returns '.txt'
 
+    if extension == ".ical" or extension == ".ics" or extension == ".ifb":
+        return True
+    else:
+        return False
 def parse_ical_file(file_path: str) -> dict[str,list]:
     """
     Parses an .ics (iCalendar) file and extracts the events (VEVENT) and busy times (VFREEBUSY).
@@ -141,8 +147,8 @@ def parse_ical_file(file_path: str) -> dict[str,list]:
         # Check for VEVENT (Event)
         if component.name == "VEVENT":
 
-            start_time = ensure_datetime(component.get('dtstart').dt)
-            end_time = ensure_datetime(component.get('dtend').dt)
+            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
 
             # Convert start and end times to UTC
             start_time = convert_to_utc(start_time)
@@ -157,8 +163,8 @@ def parse_ical_file(file_path: str) -> dict[str,list]:
         
         # Check for VFREEBUSY (Busy Time)
         elif component.name == "VFREEBUSY":
-            start_time = ensure_datetime(component.get('dtstart').dt)
-            end_time = ensure_datetime(component.get('dtend').dt)
+            start_time = convert_date_obj_to_datetime_obj(component.get('dtstart').dt)
+            end_time = convert_date_obj_to_datetime_obj(component.get('dtend').dt)
 
             # Convert start and end times to UTC
             start_time = convert_to_utc(start_time)
@@ -179,24 +185,26 @@ def parse_ical_file(file_path: str) -> dict[str,list]:
     
     return parsed_data
 
-# Helper function to convert to datetime if it's a date object
-def ensure_datetime(obj):
-    if isinstance(obj, date) and not isinstance(obj,datetime):
-        return datetime.combine(obj, datetime.min.time())
-    return obj
+def parse_json_name(json_name:str) -> str:
+    words_to_check = ["google", "apple", "microsoft", "upload", "url"]
 
-# Convert all datetimes to UTC
-def convert_to_utc(dt):
-    # Check if datetime is naive (doesn't have timezone info)
-    if dt.tzinfo is None:
-        # If it's naive, localize it to UTC
-        tz = pytz.utc
-        dt = tz.localize(dt)  # Make it aware in UTC
+    for word in words_to_check:
+        if word.lower() in json_name.lower():
+            return word
+
+    return "No match found"
+
+def get_path_from_filename(base_dir: Path,filename:str) -> Path:
+    # Create the new path by joining the base directory with the filename
+    new_path = base_dir / filename
+
+    # Check if the path exists
+    if new_path.exists():
+        print(f"Path exists: {new_path}")
     else:
-        # If it's aware, convert to UTC
-        dt = dt.astimezone(pytz.utc)
-    return dt
-
+        print(f"Path does not exist: {new_path}")
+    
+    return new_path
 
 def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetime ,invite_range_end:datetime) -> dict[str,list[dict]]:
     
@@ -221,8 +229,6 @@ def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetim
             user_events["busy_times"].pop(index)
 
     return user_events
-
-
 
 
 def does_sched_event_overlap_with_invite(sched_event_start: datetime, sched_event_end: datetime, invite_range_start: datetime,invite_range_end: datetime)->bool:
