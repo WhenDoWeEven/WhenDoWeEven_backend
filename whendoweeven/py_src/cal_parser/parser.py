@@ -10,7 +10,7 @@ from datetime import datetime, timezone, timedelta, date
 import pytz
 from pytz import UTC
 
-from src.rec_algo import create_rec_file_times as CREATE_RECS
+from py_src.rec_algo import create_rec_file_times as CREATE_RECS
 
 """
 Calendar file parser based off of RFC 
