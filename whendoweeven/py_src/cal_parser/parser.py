@@ -151,10 +151,10 @@ def filter_out_events_outside_range(user_events:dict ,invite_range_start:datetim
     # Iterate backwards to prevent index shifting issues
     for index in reversed(range(len(user_events["events"]))):
         event = user_events["events"][index]
-        sched_event_start: datetime = event["start"]
-        sched_event_end: datetime = event["end"]
+        sched_event_start: datetime = convert_datetime_to_utc(event["start"])
+        sched_event_end: datetime = convert_datetime_to_utc(event["end"])
 
-        if (not does_sched_event_overlap_with_invite(sched_event_start, sched_event_end, invite_range_start, invite_range_end) or 
+        if (not does_sched_event_overlap_with_invite(sched_event_start, sched_event_end, convert_datetime_to_utc(invite_range_start), convert_datetime_to_utc(invite_range_end)) or 
             does_sched_event_completely_overlap_with_invite(sched_event_start, sched_event_end, invite_range_start, invite_range_end)):
             user_events["events"].pop(index)
 

@@ -44,7 +44,7 @@ def process_args() -> tuple[str,str]:
     # Parse the arguments
     args = parser.parse_args()
     
-    return (args.filename,args.event_id)
+    return (args.filename,args.event_id, args.user_id)
 
 def run_script(PATH_TO_FILE:str, event_id,user_id):
     ### Get the Event document ###
@@ -65,7 +65,7 @@ def run_script(PATH_TO_FILE:str, event_id,user_id):
             start_datetime = datetime.combine(date, start_time)
             end_datetime = datetime.combine(date, end_time)
             
-            free_times.extend(find_free_times(filter_out_events_outside_range(user_events=user_ical_dict,invite_range_start=start_datetime, invite_range_end=end_datetime)))
+            free_times.extend(find_free_times(filter_out_events_outside_range(user_events=user_ical_dict,invite_range_start=start_datetime, invite_range_end=end_datetime),start_datetime,end_datetime))
 
         print(free_times)
         ### put all free times under the user in mongo
@@ -84,7 +84,9 @@ if __name__ == "__main__":
     # TEST_PATH_TO_JSON = "../../../temp_data/test_google_.json"
 
     filename, event_id, user_id = process_args()
-
+    print(filename)
+    print(event_id)
+    print(user_id)
     CLIENT: MongoClient = connect_to_mongoDB()
     
 
@@ -98,7 +100,7 @@ if __name__ == "__main__":
     if parse_json_name(filename) == "upload" and is_cal_file(filename):
         ### pull in the file
         PATH_TO_FILE: Path = get_path_from_filename(BASE_DIR,filename)
-        
+        print("reached!")
         run_script(PATH_TO_FILE,event_id,user_id)
         
         
